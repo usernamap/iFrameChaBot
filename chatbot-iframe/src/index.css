@@ -1,0 +1,26 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+.chat-container {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Ajoutez ces styles pour s'assurer que le chat est visible en mode sombre */
+.dark-mode {
+  background-color: #333;
+  color: #fff;
+}
+
+.dark-mode .chat-container {
+  background-color: #444;
+}
+
+/* Assurez-vous que le chat est toujours visible */
+.chatbot-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
