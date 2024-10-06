@@ -6,8 +6,6 @@ export interface Chatbot {
 }
 
 export interface ChatbotConfig {
-    // Général
-    // Apparence
     primaryColor: string;
     textColor: string;
     userMessageBackgroundColor: string;
@@ -27,25 +25,20 @@ export interface ChatbotConfig {
     openingBubbleWidth?: string;
     openingBubbleHeight?: string;
     openingBubbleIcon?: File | string;
-    animateOpenClose?: boolean; // Déjà utilisé dans le bouton
-    // Nouvelles propriétés
+    animateOpenClose?: boolean; 
     sendButtonIcon?: File | string;
-    // Nouvelles propriétés
     darkModeSunLogo?: File | string;
     darkModeMoonLogo?: File | string;
 
-    // Nouvelle propriété
     ttsLogo?: File | string;
 
     darkModeLogo?: File | string;
 
-    // Messages
     welcomeMessage: string;
     headerTitle: string;
     headerSubtitle: string;
     statusMessage: string;
 
-    // Fonctionnalités
     enableDarkMode: boolean;
     enableTTS: boolean;
     ttsConfig: TTSConfig;
@@ -117,15 +110,15 @@ export interface ChatbotConfig {
 export interface TypingAnimationConfig {
     typingAnimationType?: 'animation' | 'texte' | 'logo';
     typingText?: string;
-    typingLogo?: File | string; // Selon votre gestion des fichiers
-    typingAnimationColor?: string; // Couleur des points d'animation
-    typingAnimationSize?: number;  // Taille des points d'animation en pixels
+    typingLogo?: File | string; 
+    typingAnimationColor?: string; 
+    typingAnimationSize?: number;  
 }
 
 export interface TTSConfig {
-    availableVoices: string[]; // Ex: ['nova', 'alloy', 'echo', 'fable', 'onyx', 'shimmer']
+    availableVoices: string[];
     enabledVoices: {
-        [key: string]: boolean; // Ex: { nova: true, alloy: true, echo: false, ... }
+        [key: string]: boolean; 
     };
     defaultVoice: string;
     defaultSpeed: number;

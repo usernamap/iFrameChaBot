@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Switch } from '@/components/ui/switch'; // Assurez-vous que le chemin est correct
+import { Switch } from '@/components/ui/Switch'; // Assurez-vous que le chemin est correct
 import { Icons } from '@/components/common/Icons';
 
 interface SwitchWithLabelProps {

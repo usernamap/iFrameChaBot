@@ -18,6 +18,7 @@ import DarkModeLogoPreview from './DarkModeLogoPreview';
 import TTSLogoPreview from './TTSLogoPreview';
 import { ChatbotConfig } from '../../types';
 import { Icons } from '@/components/common/Icons';
+import usePersistedState from '@/contexts/usePersistedState';
 
 
 interface ChatbotCustomizationProps {
@@ -33,7 +34,7 @@ const ChatbotCustomization: React.FC<ChatbotCustomizationProps> = ({
     activeTab,
     setActiveTab,
 }) => {
-    const [statusType, setStatusType] = useState(config.statusConfig?.type || 'none');
+    const [statusType, setStatusType] = usePersistedState('statusType', config.statusConfig?.type || 'none');
     const [showTooltip, setShowTooltip] = useState(false);
     const [tooltipContent, setTooltipContent] = useState('');
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -41,6 +42,14 @@ const ChatbotCustomization: React.FC<ChatbotCustomizationProps> = ({
     useEffect(() => {
         audioRef.current = new Audio();
     }, []);
+
+    const updateStatusMessage = (status: 'online' | 'away' | 'offline', value: string) => {
+        const updatedStatusMessages = {
+            ...config.STATUS_MESSAGES,
+            [status]: value
+        };
+        updateConfig('STATUS_MESSAGES', updatedStatusMessages);
+    };
 
     const ttsVoices = [
         { key: 'nova', value: 'nova', label: 'Nova' },
@@ -312,6 +321,26 @@ const ChatbotCustomization: React.FC<ChatbotCustomizationProps> = ({
                             onChange={(e) => updateConfig('placeholderText', e.target.value)}
                             onTooltip={() => handleTooltip("Ce texte sera affiché dans la zone de saisie du chatbot pour inviter l'utilisateur à écrire un message.")}
                         />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <InputWithLabel
+                                label="Texte - En ligne"
+                                value={config.STATUS_MESSAGES.online}
+                                onChange={(e) => updateStatusMessage('online', e.target.value)}
+                                onTooltip={() => handleTooltip("Entrez le texte qui sera affiché lorsque le chatbot est en ligne.")}
+                            />
+                            <InputWithLabel
+                                label="Texte - Absent"
+                                value={config.STATUS_MESSAGES.away}
+                                onChange={(e) => updateStatusMessage('away', e.target.value)}
+                                onTooltip={() => handleTooltip("Entrez le texte qui sera affiché lorsque le chatbot est absent.")}
+                            />
+                            <InputWithLabel
+                                label="Texte - Hors ligne"
+                                value={config.STATUS_MESSAGES.offline}
+                                onChange={(e) => updateStatusMessage('offline', e.target.value)}
+                                onTooltip={() => handleTooltip("Entrez le texte qui sera affiché lorsque le chatbot est hors ligne.")}
+                            />
+                        </div>
                         {/* <SwitchWithLabel
                             id='enableStatus'
                             checked={config.enableStatus}

@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
-import { ChatbotConfig } from '../../types';
+import { ChatbotConfig } from '@/types';
 import { Icons } from '@/components/common/Icons';
 import TypingAnimation from './TypingAnimation';
 import ReactMarkdown from 'react-markdown';
+import usePersistedState from '@/contexts/usePersistedState';
 
 interface ChatbotPreviewProps {
     config: ChatbotConfig;
@@ -56,16 +57,7 @@ const TTSOptionsPortal: React.FC<{
 };
 
 const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
-    const [isOpen, setIsOpen] = useState(true);
-    const [messages, setMessages] = useState([
-        {
-            id: 'welcome',
-            text: config.welcomeMessage,
-            isBot: true,
-            timestamp: new Date().toISOString(), // Utilisez toISOString() pour une représentation cohérente
-            isRead: false
-        },
-    ]);
+    const [isOpen, setIsOpen] = usePersistedState('chatbotIsOpen', true);
     const [clientSideMessages, setClientSideMessages] = useState<Array<{
         id: string;
         text: string;
@@ -73,30 +65,30 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
         timestamp: string;
         isRead: boolean;
     }>>([]);
-    const [input, setInput] = useState('');
-    const [isTyping, setIsTyping] = useState(false);
-    const [error, setError] = useState<{ type: string; message: string } | null>(null);
-    const [assistantStatus, setAssistantStatus] = useState('online');
+    const [input, setInput] = usePersistedState('chatbotInput', '');
+    const [isTyping, setIsTyping] = usePersistedState('chatbotIsTyping', false);
+    const [error, setError] = usePersistedState<{ type: string; message: string } | null>('chatbotError', null);
+    const [assistantStatus, setAssistantStatus] = usePersistedState('chatbotAssistantStatus', 'online');
     const [lastActivityTime, setLastActivityTime] = useState(Date.now());
     const [showFeedback, setShowFeedback] = useState(false);
     const [feedbackRating, setFeedbackRating] = useState<number | null>(null);
     const [detailedFeedback, setDetailedFeedback] = useState('');
     const [isResolved, setIsResolved] = useState(false);
-    const [showProactivePrompt, setShowProactivePrompt] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    const [showProactivePrompt, setShowProactivePrompt] = usePersistedState('chatbotShowProactivePrompt', false);
+    const [isDarkMode, setIsDarkMode] = usePersistedState('chatbotIsDarkMode', false);
     const inputRef = useRef<HTMLInputElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
 
     // TTS related state
-    const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
-    const [isTTSEnabled, setIsTTSEnabled] = useState(config.enableTTS);
-    const [selectedVoice, setSelectedVoice] = useState(config.ttsConfig.defaultVoice);
-    const [volume, setVolume] = useState(config.ttsConfig.defaultVolume);
-    const [speed, setSpeed] = useState(config.ttsConfig.defaultSpeed);
-    const [showTTSOptions, setShowTTSOptions] = useState(false);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
-    const [readMessageIds, setReadMessageIds] = useState(new Set<string>());
+    const [currentlyPlayingId, setCurrentlyPlayingId] = usePersistedState<string | null>('chatbotCurrentlyPlayingId', null);
+    const [isTTSEnabled, setIsTTSEnabled] = usePersistedState('chatbotIsTTSEnabled', config.enableTTS);
+    const [selectedVoice, setSelectedVoice] = usePersistedState('chatbotSelectedVoice', config.ttsConfig.defaultVoice);
+    const [volume, setVolume] = usePersistedState('chatbotVolume', config.ttsConfig.defaultVolume);
+    const [speed, setSpeed] = usePersistedState('chatbotSpeed', config.ttsConfig.defaultSpeed);
+    const [showTTSOptions, setShowTTSOptions] = usePersistedState('chatbotShowTTSOptions', false);
+    const [isPlaying, setIsPlaying] = usePersistedState('chatbotIsPlaying', false);
+    const [playingMessageId, setPlayingMessageId] = usePersistedState<string | null>('chatbotPlayingMessageId', null);
+    const [readMessageIds, setReadMessageIds] = usePersistedState<string[]>('chatbotReadMessageIds', []);
     const ttsButtonRef = useRef<HTMLButtonElement>(null);
 
     const enabledVoices = config.ttsConfig.availableVoices.filter(voice =>
@@ -132,6 +124,14 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
     }, [config.welcomeMessage]);
 
     useEffect(() => {
+        // Mettez à jour les états qui dépendent de la configuration
+        setIsTTSEnabled(config.enableTTS);
+        setSelectedVoice(config.ttsConfig.defaultVoice);
+        setVolume(config.ttsConfig.defaultVolume);
+        setSpeed(config.ttsConfig.defaultSpeed);
+    }, [config]);
+
+    useEffect(() => {
         if (config.enableStatus) {
             setAssistantStatus(config.statusConfig.dotStatus || 'online');
         } else {
@@ -147,10 +147,6 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
             setAssistantStatus('online');
         }
     }, [config.enableStatus, config.statusConfig]);
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages, scrollToBottom]);
 
     const toggleChat = () => {
         setIsOpen(!isOpen);
@@ -603,7 +599,7 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     style={{
-                                        backgroundColor: isDarkMode ? config.darkModeConfig.buttonBackgroundColor : config.primaryColor,
+                                        backgroundColor: config.primaryColor,
                                         color: isDarkMode ? config.darkModeConfig.buttonTextColor : 'white'
                                     }}
                                 >
@@ -619,7 +615,7 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
                 className={`bg-blue-600 text-white mt-5 p-3 rounded-full shadow-lg hover:bg-blue-700 transition flex items-center justify-center animate-bounce`}
                 aria-label={isOpen ? "Fermer le chat" : "Ouvrir le chat"}
                 style={{
-                    backgroundColor: isDarkMode ? config.darkModeConfig.primaryColor : config.primaryColor,
+                    backgroundColor: config.primaryColor,
                     width: config.openingBubbleWidth,
                     height: config.openingBubbleHeight
                 }}
