@@ -222,6 +222,7 @@ const Chatbot = () => {
     const checkServerStatus = useCallback(async () => {
         try {
             const response = await makeRequest('status', { timeout: 5000 });
+            console.log("Response from server:", response);  // Log de la réponse complète
             if (response.data.status === 'online') {
                 setAssistantStatus(prev => prev === 'offline' ? 'online' : prev);
                 setIsServerAvailable(true);
@@ -235,6 +236,7 @@ const Chatbot = () => {
             setIsServerAvailable(false);
         }
     }, [makeRequest]);
+
 
     // Typing Simulation
     const simulateTyping = useCallback((duration) => {
@@ -590,7 +592,7 @@ const Chatbot = () => {
                     width: '0',
                     height: '0',
                     border: 'none',
-                    position: 'absolute',
+                    position: 'fixed',
                     pointerEvents: 'none',
                 }}
                 title="Chatbot iframe (server unavailable)"

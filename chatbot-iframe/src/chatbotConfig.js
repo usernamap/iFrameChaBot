@@ -114,11 +114,11 @@ const defaultConfig = {
   ttsToggleIcon: null, // Vous pouvez définir une icône personnalisée ici
 
   // Configuration du serveur
-  serverUrl: 'http://localhost:3001',
+  serverUrl: 'http://localhost:3002',
   apiEndpoints: {
-    chat: '/api/chat',
-    status: '/api/status',
-    tts: '/api/tts'
+    chat: '/api/chatbot/chat',
+    status: '/api/chatbot/status',
+    tts: '/api/chatbot/tts'
   },
 
   // Configuration des requêtes

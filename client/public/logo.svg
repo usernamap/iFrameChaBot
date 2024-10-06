@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4A00E0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8E2DE2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Logo Symbol -->
+  <g transform="translate(0, 0) scale(1)">
+    <!-- Base shape with gradient fill -->
+    <path d="M25,5 L75,5 Q95,5 95,25 L95,75 Q95,95 75,95 L25,95 Q5,95 5,75 L5,25 Q5,5 25,5 Z" fill="url(#grad1)" />
+    
+    <!-- Inner details -->
+    <circle cx="50" cy="50" r="35" fill="none" stroke="#ffffff" stroke-width="2" />
+
+    <!-- Complex Neural Network -->
+    <g stroke="#ffffff" stroke-width="0.7" fill="none">
+      <!-- Nodes -->
+      <circle cx="30" cy="30" r="2.5" fill="#ffffff" />
+      <circle cx="70" cy="30" r="2.5" fill="#ffffff" />
+      <circle cx="30" cy="70" r="2.5" fill="#ffffff" />
+      <circle cx="70" cy="70" r="2.5" fill="#ffffff" />
+      <circle cx="50" cy="15" r="2.5" fill="#ffffff" />
+      <circle cx="50" cy="85" r="2.5" fill="#ffffff" />
+      <circle cx="15" cy="50" r="2.5" fill="#ffffff" />
+      <circle cx="85" cy="50" r="2.5" fill="#ffffff" />
+      <circle cx="40" cy="40" r="2.5" fill="#ffffff" />
+      <circle cx="60" cy="40" r="2.5" fill="#ffffff" />
+      <circle cx="40" cy="60" r="2.5" fill="#ffffff" />
+      <circle cx="60" cy="60" r="2.5" fill="#ffffff" />
+      <circle cx="50" cy="50" r="4" fill="#ffffff" />
+
+      <!-- Connections -->
+      <path d="M30,30 Q40,35 50,15" />
+      <path d="M70,30 Q60,35 50,15" />
+      <path d="M30,70 Q40,65 50,85" />
+      <path d="M70,70 Q60,65 50,85" />
+      <path d="M15,50 Q35,50 30,30" />
+      <path d="M15,50 Q35,50 30,70" />
+      <path d="M85,50 Q65,50 70,30" />
+      <path d="M85,50 Q65,50 70,70" />
+      <path d="M40,40 Q45,45 50,50" />
+      <path d="M60,40 Q55,45 50,50" />
+      <path d="M40,60 Q45,55 50,50" />
+      <path d="M60,60 Q55,55 50,50" />
+      <path d="M30,30 Q40,40 50,50" />
+      <path d="M70,30 Q60,40 50,50" />
+      <path d="M30,70 Q40,60 50,50" />
+      <path d="M70,70 Q60,60 50,50" />
+    </g>
+  </g>
+</svg>

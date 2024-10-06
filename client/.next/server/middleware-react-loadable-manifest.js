@@ -1,0 +1,1 @@
+self.__REACT_LOADABLE_MANIFEST="{\"pages/index.tsx -> @/components/home/FAQ\":{\"id\":\"pages/index.tsx -> @/components/home/FAQ\",\"files\":[\"static/chunks/src_components_home_FAQ_tsx.js\"]},\"pages/index.tsx -> @/components/home/Testimonials\":{\"id\":\"pages/index.tsx -> @/components/home/Testimonials\",\"files\":[\"static/chunks/src_components_home_Testimonials_tsx.js\"]}}"
