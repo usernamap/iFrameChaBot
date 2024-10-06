@@ -458,7 +458,6 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
                         <div className="h-96 overflow-y-auto p-4" ref={messagesContainerRef}>
                             <AnimatePresence>
                                 {clientSideMessages.map((message) => {
-                                    console.log('Message:', message, 'Config:', config.messageConfig);
                                     return (
                                         <motion.div
                                             key={message.id}
