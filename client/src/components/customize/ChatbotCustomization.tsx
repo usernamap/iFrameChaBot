@@ -19,6 +19,7 @@ import TTSLogoPreview from './TTSLogoPreview';
 import { ChatbotConfig } from '../../types';
 import { Icons } from '@/components/common/Icons';
 import usePersistedState from '@/contexts/usePersistedState';
+import Link from 'next/link';
 
 
 interface ChatbotCustomizationProps {
@@ -798,6 +799,7 @@ const ChatbotCustomization: React.FC<ChatbotCustomizationProps> = ({
             <AnimatePresence mode="wait">
                 {tabContent[activeTab as keyof typeof tabContent]}
             </AnimatePresence>
+
             <AnimatePresence>
                 {showTooltip && (
                     <motion.div

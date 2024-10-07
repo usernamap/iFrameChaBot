@@ -14,21 +14,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: `
-              default-src 'self';
-              script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval' https://js.stripe.com;
-              style-src 'self' 'unsafe-inline';
-              img-src 'self' data: https:;
-              font-src 'self' data:;
-              connect-src 'self' https://api.stripe.com https://r.stripe.com;
-              frame-src 'self' https://js.stripe.com;
-              object-src 'none';
-              base-uri 'self';
-              form-action 'self';
-              frame-ancestors 'none';
-              block-all-mixed-content;
-              upgrade-insecure-requests;
-            `.replace(/\s+/g, ' ').trim()
+            value: "default-src 'self'; media-src 'self' blob:; connect-src 'self' https://api.stripe.com https://r.stripe.com https://aliatech.fr http://localhost:3002/; script-src 'self' 'unsafe-eval' 'unsafe-inline' http://localhost:3002/; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
           },
           {
             key: 'X-Frame-Options',

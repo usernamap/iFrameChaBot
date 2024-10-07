@@ -9,6 +9,8 @@ import ChatbotPreview from '@/components/customize/ChatbotPreview';
 import ClientOnly from '../components/ClientOnly';
 import usePersistedState from '../contexts/usePersistedState';
 import { RotateCcw } from 'lucide-react';
+import Link from 'next/link';
+import { Icons } from '@/components/common/Icons';
 
 const defaultConfig: ChatbotConfig = {
     // Général
@@ -184,7 +186,8 @@ const defaultConfig: ChatbotConfig = {
 };
 
 export default function CustomizeChatbot() {
-    const [chatbotConfig, setChatbotConfig] = usePersistedState<ChatbotConfig>('persistedChatbotConfig', defaultConfig);
+    const [chatbotConfig, setChatbotConfig] = usePersistedState<ChatbotConfig>('chatbotConfig', defaultConfig);
+    const [hasVisitedRecap, setHasVisitedRecap] = usePersistedState<boolean>('hasVisitedRecap', false);
     const router = useRouter();
 
     const tabOrder = ['features', 'messages', 'appearance'] as const;
@@ -194,6 +197,7 @@ export default function CustomizeChatbot() {
 
     const handleConfigChange = (newConfig: ChatbotConfig) => {
         setChatbotConfig(newConfig);
+        localStorage.setItem('chatbotConfig', JSON.stringify(newConfig));
     };
 
     const handleNextStep = () => {
@@ -202,6 +206,7 @@ export default function CustomizeChatbot() {
             setActiveTab(tabOrder[currentIndex + 1]);
         } else {
             localStorage.setItem('chatbotConfig', JSON.stringify(chatbotConfig));
+            setHasVisitedRecap(true);
             router.push('/company-info');
         }
     };
@@ -211,13 +216,20 @@ export default function CustomizeChatbot() {
         setActiveTab('features');
     };
 
+    useEffect(() => {
+        const storedHasVisitedRecap = localStorage.getItem('hasVisitedRecap');
+        if (storedHasVisitedRecap) {
+            setHasVisitedRecap(JSON.parse(storedHasVisitedRecap));
+        }
+    }, []);
+
     const isLastTab = activeTab === tabOrder[tabOrder.length - 1];
     const buttonText = isLastTab ? 'Terminé' : 'Suivant';
 
     return (
         <Layout title="Personnaliser votre chatbot">
             <ClientOnly>
-                <div className="container mx-auto px-4 py-12">
+                <div className="container mx-auto px-4 pb-12">
                     <motion.h1
                         className="text-4xl font-bold mb-8 text-center"
                         initial={{ opacity: 0, y: -20 }}
@@ -239,16 +251,32 @@ export default function CustomizeChatbot() {
                                 activeTab={activeTab}
                                 setActiveTab={(tab: Tab) => setActiveTab(tab)}
                             />
-                            <div className="flex justify-center mt-4">
-                                <motion.button
-                                    onClick={handleNextStep}
-                                    className="bg-primary text-white px-6 py-2 rounded-full hover:bg-primary-dark flex items-center justify-center"
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                >
-                                    {buttonText}
-                                    <ArrowRight className="ml-2" size={20} />
-                                </motion.button>
+                            <div className="mt-8 flex justify-between items-center">
+                                {hasVisitedRecap && (
+                                    <div className="mt-4 flex justify-center">
+                                        <Link href="/recap-and-test" passHref>
+                                            <motion.button
+                                                className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition-colors flex items-center text-center"
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
+                                            >
+                                                <Icons.Check />
+                                                Retour au récapitulatif
+                                            </motion.button>
+                                        </Link>
+                                    </div>
+                                )}
+                                <div className="flex justify-center mt-4">
+                                    <motion.button
+                                        onClick={handleNextStep}
+                                        className="bg-primary text-white px-6 py-2 rounded-full hover:bg-primary-dark flex items-center justify-center"
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        {buttonText}
+                                        <ArrowRight className="ml-2" size={20} />
+                                    </motion.button>
+                                </div>
                             </div>
                         </motion.div>
                         <motion.div
@@ -257,9 +285,9 @@ export default function CustomizeChatbot() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.5, delay: 0.2 }}
                         >
-                            <h2 className="text-2xl font-bold mb-4">Aperçu en temps réel</h2>
+                            <h2 className="text-2xl font-bold mb-4 text-center">Aperçu en temps réel</h2>
                             <div className="sticky top-24">
-                                <ChatbotPreview config={chatbotConfig} />
+                                <ChatbotPreview config={chatbotConfig} maxMessages={20} />
                             </div>
                             <div className="mt-4 flex justify-center">
                                 <motion.button

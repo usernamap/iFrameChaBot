@@ -298,3 +298,9 @@ export interface Message {
     isBot: boolean;
     timestamp: Date;
 }
+
+export interface CompanyInfoStepsProps {
+    companyInfo: CompanyInfo;
+    updateCompanyInfo: (updates: Partial<CompanyInfo>) => void;
+    onComplete: () => void;
+}

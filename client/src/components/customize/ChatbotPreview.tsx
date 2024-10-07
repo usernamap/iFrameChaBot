@@ -7,9 +7,18 @@ import { Icons } from '@/components/common/Icons';
 import TypingAnimation from './TypingAnimation';
 import ReactMarkdown from 'react-markdown';
 import usePersistedState from '@/contexts/usePersistedState';
+import { CompanyInfo } from '@/types';
+
+const TTS_REPLAY_LIMIT = 10;
+
 
 interface ChatbotPreviewProps {
     config: ChatbotConfig;
+    useRealAPI?: boolean;
+    companyInfo?: CompanyInfo;
+    maxMessages: number;
+    onMessageSent?: () => void;
+    disabled?: boolean;
 }
 
 const TTSOptionsPortal: React.FC<{
@@ -56,7 +65,7 @@ const TTSOptionsPortal: React.FC<{
     );
 };
 
-const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
+const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config, useRealAPI = false, companyInfo, maxMessages, onMessageSent }) => {
     const [isOpen, setIsOpen] = usePersistedState('chatbotIsOpen', true);
     const [clientSideMessages, setClientSideMessages] = useState<Array<{
         id: string;
@@ -71,13 +80,13 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
     const [assistantStatus, setAssistantStatus] = usePersistedState('chatbotAssistantStatus', 'online');
     const [lastActivityTime, setLastActivityTime] = useState(Date.now());
     const [showFeedback, setShowFeedback] = useState(false);
-    const [feedbackRating, setFeedbackRating] = useState<number | null>(null);
-    const [detailedFeedback, setDetailedFeedback] = useState('');
-    const [isResolved, setIsResolved] = useState(false);
     const [showProactivePrompt, setShowProactivePrompt] = usePersistedState('chatbotShowProactivePrompt', false);
     const [isDarkMode, setIsDarkMode] = usePersistedState('chatbotIsDarkMode', false);
     const inputRef = useRef<HTMLInputElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
+    const [messageCount, setMessageCount] = usePersistedState('chatbotMessageCount', 0);
+    const [apiAvailable, setApiAvailable] = useState(true);
+
 
     // TTS related state
     const [currentlyPlayingId, setCurrentlyPlayingId] = usePersistedState<string | null>('chatbotCurrentlyPlayingId', null);
@@ -90,6 +99,10 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
     const [playingMessageId, setPlayingMessageId] = usePersistedState<string | null>('chatbotPlayingMessageId', null);
     const [readMessageIds, setReadMessageIds] = usePersistedState<string[]>('chatbotReadMessageIds', []);
     const ttsButtonRef = useRef<HTMLButtonElement>(null);
+    const audioRef = useRef(new Audio());
+    const [ttsReplayCount, setTtsReplayCount] = usePersistedState<{ [key: string]: number }>('chatbotTtsReplayCount', {});
+
+
 
     const enabledVoices = config.ttsConfig.availableVoices.filter(voice =>
         config.ttsConfig.enabledVoices[voice as keyof typeof config.ttsConfig.enabledVoices]
@@ -178,9 +191,88 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
         }, 2000);
     }, []);
 
+    useEffect(() => {
+        if (useRealAPI) {
+            // Vérifiez si l'API est disponible au démarrage
+            const checkApiAvailability = async () => {
+                try {
+                    const response = await fetch('http://localhost:3002/api/chatbot/chat', {
+                        method: 'HEAD',
+                    });
+                    if (!response.ok) {
+                        throw new Error('API indisponible');
+                    }
+                    setApiAvailable(true);
+                } catch (error) {
+                    console.error('API non disponible:', error);
+                    setApiAvailable(false);
+                }
+            };
+            checkApiAvailability();
+        }
+    }, [useRealAPI]);
+
+    const playTTS = useCallback(async (text, messageId) => {
+        if (!isTTSEnabled || volume === 0) return;
+
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+        }
+
+        setIsPlaying(true);
+        setPlayingMessageId(messageId);
+
+        try {
+            const response = await fetch('http://localhost:3002/api/chatbot/tts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text,
+                    voice: selectedVoice,
+                    volume,
+                    speed,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur lors de la communication avec le serveur TTS');
+            }
+
+            const audioArrayBuffer = await response.arrayBuffer();
+            const audioBlob = new Blob([audioArrayBuffer], { type: 'audio/mpeg' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            audioRef.current.src = audioUrl;
+            audioRef.current.volume = volume;
+            audioRef.current.playbackRate = speed;
+            await audioRef.current.play();
+            audioRef.current.onended = () => {
+                URL.revokeObjectURL(audioUrl);
+                setIsPlaying(false);
+                setPlayingMessageId(null);
+            };
+        } catch (error) {
+            console.error('Erreur lors de la lecture TTS:', error);
+            setIsPlaying(false);
+            setPlayingMessageId(null);
+        }
+    }, [isTTSEnabled, selectedVoice, volume, speed]);
+
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (input.trim() === '' || assistantStatus === 'offline') return;
+
+        if (useRealAPI && !apiAvailable) {
+            setError({ type: 'api_unavailable', message: 'L’API est actuellement indisponible. Veuillez réessayer plus tard.' });
+            return;
+        } else if (!useRealAPI) {
+            setError(null);
+        }
+
+
 
         updateLastActivityTime();
         setShowFeedback(false);
@@ -199,24 +291,71 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
         setInput('');
 
         try {
-            const typingDuration = Math.random() * 2000 + 1000;
-            await simulateTyping(typingDuration);
+            if (useRealAPI) {
+                setIsTyping(true);
+                const response = await fetch('http://localhost:3002/api/chatbot/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: input,
+                        companyInfo: companyInfo,
+                        chatbotConfig: config,
+                    }),
+                });
 
-            // Simulated API call
-            const botResponse = "Ceci est une réponse simulée de l'assistant virtuel.";
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la communication avec le serveur');
+                }
 
-            const botMessage = {
-                id: uuidv4(),
-                text: botResponse,
-                isBot: true,
-                timestamp: new Date().toISOString(),
-                isRead: false,
-            };
+                setMessageCount(prevCount => {
+                    const newCount = prevCount + 1;
+                    if (newCount >= maxMessages) {
+                        if (inputRef.current) {
+                            inputRef.current.disabled = true;
+                        }
+                    }
+                    return newCount;
+                });
+                onMessageSent && onMessageSent();
 
-            setClientSideMessages(prev => [...prev, botMessage]);
+                const data = await response.json();
+                setIsTyping(false);
 
-            if (config.enableTTS) {
-                simulateTTS(botMessage.id);
+                const botMessage = {
+                    id: uuidv4(),
+                    text: data.response,
+                    isBot: true,
+                    timestamp: new Date().toISOString(),
+                    isRead: false,
+                };
+
+                setClientSideMessages(prev => [...prev, botMessage]);
+
+                if (config.enableTTS) {
+                    playTTS(data.response, botMessage.id);
+                }
+            } else {
+                // Simulation de la réponse
+                const typingDuration = Math.random() * 2000 + 1000;
+                await simulateTyping(typingDuration);
+
+                const botResponse = "Ceci est une réponse simulée de l'assistant virtuel.";
+
+                const botMessage = {
+                    id: uuidv4(),
+                    text: botResponse,
+                    isBot: true,
+                    timestamp: new Date().toISOString(),
+                    isRead: false,
+                };
+
+                setClientSideMessages(prev => [...prev, botMessage]);
+
+                if (config.enableTTS) {
+                    simulateTTS(botMessage.id);
+                }
             }
 
             if (Math.random() < config.feedbackProbability) {
@@ -234,11 +373,24 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
     };
 
     const replayMessage = (messageId: string, text: string) => {
-        if (playingMessageId === messageId) {
-            setIsPlaying(false);
-            setPlayingMessageId(null);
-        } else {
+        simulateTTS(messageId);
+    };
+
+    const replayMessageTest = (messageId: string, text: string) => {
+        // Obtenez le compteur de répétition actuel pour ce message
+        const currentReplayCount = ttsReplayCount[messageId] || 0;
+
+        if (currentReplayCount >= TTS_REPLAY_LIMIT) {
+            // Si la limite est atteinte, utilisez simulateTTS au lieu de playTTS
+            console.warn(`Limite de répétition atteinte pour le message ${messageId}. Utilisation de simulateTTS.`);
             simulateTTS(messageId);
+        } else {
+            // Sinon, utilisez playTTS et mettez à jour le compteur
+            playTTS(text, messageId);
+            setTtsReplayCount(prev => ({
+                ...prev,
+                [messageId]: currentReplayCount + 1,
+            }));
         }
     };
 
@@ -251,11 +403,17 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
     const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newVolume = parseFloat(e.target.value);
         setVolume(newVolume);
+        if (audioRef.current) {
+            audioRef.current.volume = newVolume;
+        }
     };
 
     const handleSpeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newSpeed = parseFloat(e.target.value);
         setSpeed(newSpeed);
+        if (audioRef.current) {
+            audioRef.current.playbackRate = newSpeed;
+        }
     };
 
     const getVolumeIcon = () => {
@@ -388,6 +546,14 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
         </div>
     );
 
+    if (useRealAPI && !apiAvailable) {
+        return (
+            <div className="flex items-center justify-center h-full">
+                <p className="text-red-500 font-bold">L'aperçu du chatbot est désactivé car l'API est indisponible.</p>
+            </div>
+        );
+    }
+
     return (
         <div className="relative w-96 flex items-end flex-col">
             <AnimatePresence>
@@ -490,7 +656,8 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
                                                 )}
                                                 {message.isBot && config.enableTTS && (
                                                     <button
-                                                        onClick={() => replayMessage(message.id, message.text)}
+                                                        // if useRealAPI is true, use replayMessage, else use replayMessageTest
+                                                        onClick={() => useRealAPI ? replayMessageTest(message.id, message.text) : replayMessage(message.id, message.text)}
                                                         className="ml-2 text-blue-500 hover:text-blue-700"
                                                         aria-label={playingMessageId === message.id ? "Arrêter la lecture" : "Lire le message"}
                                                     >
@@ -584,7 +751,7 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
                                     onChange={(e) => setInput(e.target.value)}
                                     placeholder={assistantStatus === 'offline' ? config.offlineText : config.placeholderText}
                                     className="flex-grow p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-                                    disabled={assistantStatus === 'offline'}
+                                    disabled={assistantStatus === 'offline' || messageCount >= maxMessages}
                                     ref={inputRef}
                                     style={isDarkMode ? {
                                         backgroundColor: config.darkModeConfig.inputBackgroundColor,
@@ -595,7 +762,7 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config }) => {
                                 <motion.button
                                     type="submit"
                                     className="bg-blue-600 text-white p-2 rounded-r-lg hover:bg-blue-700 transition disabled:opacity-50"
-                                    disabled={input.trim() === '' || assistantStatus === 'offline'}
+                                    disabled={input.trim() === '' || assistantStatus === 'offline' || messageCount >= maxMessages}
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     style={{

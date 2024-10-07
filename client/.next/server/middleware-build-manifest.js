@@ -19,10 +19,10 @@ self.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/company-info": [
+    "/customize": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/company-info.js"
+      "static/chunks/pages/customize.js"
     ],
     "/recap-and-test": [
       "static/chunks/webpack.js",

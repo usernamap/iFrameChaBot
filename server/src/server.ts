@@ -18,7 +18,13 @@ const app = express();
 connectDB();
 
 // Middlewares
-app.use(cors());
+app.use(cors(
+    {
+        origin: AppConfig.SECURITY.CORS_ORIGIN,
+        methods: 'GET, POST, PUT, DELETE, HEAD',
+        allowedHeaders: 'Content-Type, Authorization',
+    }
+));
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
