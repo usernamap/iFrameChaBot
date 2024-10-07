@@ -1,16 +1,17 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { login as apiLogin, register as apiRegister, logout as apiLogout, getCurrentUser } from '@/utils/auth';
-
-interface User {
-    id: string;
-    name: string;
-    email: string;
-}
+import { auth, emailProvider, googleProvider, facebookProvider, githubProvider, twitterProvider, microsoftProvider } from '../config/firebase';
+import { signInWithPopup, signOut, onAuthStateChanged, User, AuthError, signInWithEmailAndPassword } from 'firebase/auth';
 
 interface AuthContextType {
     user: User | null;
-    login: (email: string, password: string) => Promise<void>;
-    register: (name: string, email: string, password: string) => Promise<void>;
+    loading: boolean;
+    error: string | null;
+    loginWithEmail: (email: string, password: string) => Promise<void>;
+    loginWithGoogle: () => Promise<void>;
+    loginWithFacebook: () => Promise<void>;
+    loginWithGithub: () => Promise<void>;
+    loginWithTwitter: () => Promise<void>;
+    loginWithMicrosoft: () => Promise<void>;
     logout: () => Promise<void>;
 }
 
@@ -18,46 +19,125 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const checkUser = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                if (token) {
-                    const currentUser = await getCurrentUser();
-                    setUser(currentUser);
-                }
-            } catch (error) {
-                console.error('Failed to get current user:', error);
-                localStorage.removeItem('token');
-            }
-        };
-        checkUser();
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setUser(user);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
     }, []);
 
-    const login = async (email: string, password: string) => {
-        const { user, token } = await apiLogin(email, password);
-        localStorage.setItem('token', token);
-        setUser(user);
+    const loginWithEmail = async (email: string, password: string) => {
+        setError(null);
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            const authError = error as AuthError;
+            setError(`Échec de la connexion: ${authError.code} - ${authError.message}`);
+            console.error('Login error:', authError);
+        }
+    }
+    const loginWithGoogle = async () => {
+        setError(null);
+        try {
+            await signInWithPopup(auth, googleProvider);
+        } catch (error) {
+            const authError = error as AuthError;
+            setError(`Échec de la connexion avec Google: ${authError.code} - ${authError.message}`);
+            console.error('Google login error:', authError);
+        }
     };
 
-    const register = async (name: string, email: string, password: string) => {
-        const { user, token } = await apiRegister(name, email, password);
-        localStorage.setItem('token', token);
-        setUser(user);
+    const loginWithFacebook = async () => {
+        setError(null);
+        try {
+            await signInWithPopup(auth, facebookProvider);
+        } catch (error) {
+            const authError = error as AuthError;
+            setError(`Échec de la connexion avec Facebook: ${authError.code} - ${authError.message}`);
+            console.error('Facebook login error:', authError);
+        }
     };
+
+    const loginWithGithub = async () => {
+        setError(null);
+        try {
+            await signInWithPopup(auth, githubProvider);
+        } catch (error) {
+            const authError = error as AuthError;
+            setError(`Échec de la connexion avec GitHub: ${authError.code} - ${authError.message}`);
+            console.error('GitHub login error:', authError);
+        }
+    }
+
+    const loginWithTwitter = async () => {
+        setError(null);
+        try {
+            await signInWithPopup(auth, twitterProvider);
+        } catch (error) {
+            const authError = error as AuthError;
+            setError(`Échec de la connexion avec Twitter: ${authError.code} - ${authError.message}`);
+            console.error('Twitter login error:', authError);
+        }
+    }
+
+    const loginWithMicrosoft = async () => {
+        setError(null);
+        try {
+            await signInWithPopup(auth, microsoftProvider);
+        } catch (error) {
+            const authError = error as AuthError;
+            setError(`Échec de la connexion avec Microsoft: ${authError.code} - ${authError.message}`);
+            console.error('Microsoft login error:', authError);
+        }
+    }
 
     const logout = async () => {
-        await apiLogout();
-        localStorage.removeItem('token');
-        setUser(null);
+        setError(null);
+        try {
+            await signOut(auth);
+            setUser(null);
+        } catch (error) {
+            const authError = error as AuthError;
+            setError(`Échec de la déconnexion: ${authError.code} - ${authError.message}`);
+            console.error('Logout error:', authError);
+        }
     };
 
-    const value = { user, login, register, logout };
+    useEffect(() => {
+        console.log('AuthContext: Initializing auth state listener');
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            console.log('AuthContext: Auth state changed', user);
+            setUser(user);
+            setLoading(false);
+        });
+
+        return () => {
+            console.log('AuthContext: Cleaning up auth state listener');
+            unsubscribe();
+        };
+    }, []);
+
+    const value = {
+        user,
+        loading,
+        error,
+        loginWithEmail,
+        loginWithGoogle,
+        loginWithFacebook,
+        loginWithGithub,
+        loginWithTwitter,
+        loginWithMicrosoft,
+        logout
+    };
 
     return (
         <AuthContext.Provider value={value}>
-            {children}
+            {!loading && children}
         </AuthContext.Provider>
     );
 };

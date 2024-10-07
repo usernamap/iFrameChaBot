@@ -1,180 +1,157 @@
-// import React, { useState } from 'react';
-// import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
-// import { useAuth } from '@/contexts/AuthContext';
-// import { ChatbotConfig } from '@/types';
+import React, { useState } from 'react';
+import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
+import { useAuth } from '@/contexts/AuthContext';
+import { ChatbotConfig } from '@/types';
+import { motion } from 'framer-motion';
+import { useRouter } from 'next/router';
+import EmailLoginForm from '@/components/auth/EmailLoginForm';
+import FakeEmailButton from '@/components/auth/FakeEmailButton';
+import GoogleLoginButton from '@/components/auth/GoogleLoginButton';
+import FacebookLoginButton from '@/components/auth/FacebookLoginButton';
+import TwitterLoginButton from '@/components/auth/TwitterLoginButton';
+import GithubLoginButton from '@/components/auth/GithubLoginButton';
+import MicrosoftLoginButton from '@/components/auth/MicrosoftLoginButton';
 
-// interface PaymentComponentProps {
-//     chatbotConfig: ChatbotConfig;
-//     companyInfo: any;
-//     onPaymentSuccess: () => void;
-// }
+interface PaymentComponentProps {
+    chatbotConfig: ChatbotConfig;
+    companyInfo: any;
+    onPaymentSuccess: () => void;
+}
 
-// const PaymentComponent: React.FC<PaymentComponentProps> = ({
-//     chatbotConfig,
-//     companyInfo,
-//     onPaymentSuccess,
-// }) => {
-//     const stripe = useStripe();
-//     const elements = useElements();
-//     const { user, login, register } = useAuth();
-//     const [isLogin, setIsLogin] = useState(true);
-//     const [email, setEmail] = useState('');
-//     const [password, setPassword] = useState('');
-//     const [name, setName] = useState('');
-//     const [error, setError] = useState('');
+const PaymentComponent: React.FC<PaymentComponentProps> = ({
+    chatbotConfig,
+    companyInfo,
+    onPaymentSuccess,
+}) => {
+    // const stripe = useStripe();
+    // const elements = useElements();
+    const { user } = useAuth();
+    const [paymentError, setPaymentError] = useState<string | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const router = useRouter();
+    const [error, setError] = useState<string | null>(null);
 
-//     const handleAuth = async (e: React.FormEvent) => {
-//         e.preventDefault();
-//         setError('');
-//         try {
-//             if (isLogin) {
-//                 await login(email, password);
-//             } else {
-//                 await register(name, email, password);
-//             }
-//         } catch (err) {
-//             setError('Erreur d\'authentification. Veuillez réessayer.');
-//         }
-//     };
+    const handleLoginSuccess = () => {
+        router.push('/dashboard');
+    };
 
-//     const handleSubmit = async (event: React.FormEvent) => {
-//         event.preventDefault();
+    const handleLoginError = (errorMessage: string) => {
+        setError(errorMessage);
+    };
 
-//         if (!stripe || !elements || !user) {
-//             return;
-//         }
 
-//         const cardElement = elements.getElement(CardElement);
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
+        setPaymentError(null);
 
-//         if (cardElement) {
-//             const { error, paymentMethod } = await stripe.createPaymentMethod({
-//                 type: 'card',
-//                 card: cardElement,
-//             });
+        // if (!stripe || !elements || !user) {
+        //     return;
+        // }
 
-//             if (error) {
-//                 console.log('[error]', error);
-//                 setError(error.message || 'Une erreur est survenue lors du paiement.');
-//             } else {
-//                 console.log('[PaymentMethod]', paymentMethod);
-//                 // Ici, vous pouvez ajouter la logique pour envoyer le paymentMethod.id à votre serveur
-//                 onPaymentSuccess();
-//             }
-//         }
-//     };
+        setIsProcessing(true);
 
-//     if (!user) {
-//         return (
-//             <div className="w-full max-w-md mx-auto">
-//                 <h2 className="text-2xl font-bold mb-4">{isLogin ? 'Connexion' : 'Inscription'}</h2>
-//                 <form onSubmit={handleAuth}>
-//                     {!isLogin && (
-//                         <div className="mb-4">
-//                             <label htmlFor="name" className="block mb-2">Nom</label>
-//                             <input
-//                                 type="text"
-//                                 id="name"
-//                                 value={name}
-//                                 onChange={(e) => setName(e.target.value)}
-//                                 className="w-full px-3 py-2 border rounded"
-//                                 required
-//                             />
-//                         </div>
-//                     )}
-//                     <div className="mb-4">
-//                         <label htmlFor="email" className="block mb-2">Email</label>
-//                         <input
-//                             type="email"
-//                             id="email"
-//                             value={email}
-//                             onChange={(e) => setEmail(e.target.value)}
-//                             className="w-full px-3 py-2 border rounded"
-//                             required
-//                         />
-//                     </div>
-//                     <div className="mb-4">
-//                         <label htmlFor="password" className="block mb-2">Mot de passe</label>
-//                         <input
-//                             type="password"
-//                             id="password"
-//                             value={password}
-//                             onChange={(e) => setPassword(e.target.value)}
-//                             className="w-full px-3 py-2 border rounded"
-//                             required
-//                         />
-//                     </div>
-//                     {error && <p className="text-red-500 mb-4">{error}</p>}
-//                     <button type="submit" className="w-full bg-primary text-white px-4 py-2 rounded">
-//                         {isLogin ? 'Se connecter' : 'S\'inscrire'}
-//                     </button>
-//                 </form>
-//                 <p className="mt-4 text-center">
-//                     {isLogin ? 'Pas encore de compte ?' : 'Déjà un compte ?'}
-//                     <button
-//                         onClick={() => setIsLogin(!isLogin)}
-//                         className="ml-2 text-primary hover:underline"
-//                     >
-//                         {isLogin ? 'S\'inscrire' : 'Se connecter'}
-//                     </button>
-//                 </p>
-//             </div>
-//         );
-//     }
+        // const cardElement = elements.getElement(CardElement);
 
-//     return (
-//         <div className="flex flex-col md:flex-row gap-8">
-//             <div className="w-full md:w-1/2">
-//                 <h2 className="text-2xl font-bold mb-4">Récapitulatif de la commande</h2>
-//                 <div className="space-y-4">
-//                     <div>
-//                         <h3 className="text-xl font-semibold">Configuration du chatbot</h3>
-//                         <p>Couleur principale : {chatbotConfig.primaryColor}</p>
-//                         <p>Police : {chatbotConfig.fontFamily}</p>
-//                     </div>
-//                     <div>
-//                         <h3 className="text-xl font-semibold">Informations de l'entreprise</h3>
-//                         <p>Nom : {companyInfo.name}</p>
-//                         <p>Secteur : {companyInfo.industry}</p>
-//                     </div>
-//                     <div>
-//                         <h3 className="text-xl font-semibold">Total</h3>
-//                         <p className="text-2xl font-bold">99,99 €</p>
-//                     </div>
-//                 </div>
-//             </div>
-//             <div className="w-full md:w-1/2">
-//                 <h2 className="text-2xl font-bold mb-4">Paiement</h2>
-//                 <form onSubmit={handleSubmit}>
-//                     <div className="mb-4">
-//                         <CardElement
-//                             options={{
-//                                 style: {
-//                                     base: {
-//                                         fontSize: '16px',
-//                                         color: '#424770',
-//                                         '::placeholder': {
-//                                             color: '#aab7c4',
-//                                         },
-//                                     },
-//                                     invalid: {
-//                                         color: '#9e2146',
-//                                     },
-//                                 },
-//                             }}
-//                         />
-//                     </div>
-//                     {error && <p className="text-red-500 mb-4">{error}</p>}
-//                     <button
-//                         type="submit"
-//                         disabled={!stripe}
-//                         className="w-full bg-primary text-white px-6 py-2 rounded hover:bg-primary-dark"
-//                     >
-//                         Payer
-//                     </button>
-//                 </form>
-//             </div>
-//         </div>
-//     );
-// };
+        // if (cardElement) {
+        //     try {
+        //         const { error, paymentMethod } = await stripe.createPaymentMethod({
+        //             type: 'card',
+        //             card: cardElement,
+        //         });
 
-// export default PaymentComponent;
+        //         if (error) {
+        //             setPaymentError(error.message || 'Une erreur est survenue lors du paiement.');
+        //         } else {
+        //             console.log('[PaymentMethod]', paymentMethod);
+        //             // Ici, vous devriez envoyer le paymentMethod.id à votre serveur
+        //             // pour effectuer le paiement côté serveur.
+        //             // Après confirmation du paiement côté serveur :
+        //             onPaymentSuccess();
+        //         }
+        //     } catch (err) {
+        //         setPaymentError('Une erreur inattendue est survenue. Veuillez réessayer.');
+        //     } finally {
+        //         setIsProcessing(false);
+        //     }
+        // }
+    };
+
+    if (!user) {
+        return (
+            <div className="flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-md w-full space-y-8">
+                    <div>
+                        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                            Connectez-vous à votre compte
+                        </h2>
+                    </div>
+                    {error && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                            <span className="block sm:inline">{error}</span>
+                        </div>
+                    )}
+                    <EmailLoginForm onSuccess={handleLoginSuccess} onError={handleLoginError} />
+                    <div className="mt-6">
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-300" />
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-2 bg-gray-50 text-gray-500">Ou continuer avec</span>
+                            </div>
+                        </div>
+                        <div className="mt-6 grid grid-cols-2 gap-3">
+                            <FakeEmailButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
+                            <GoogleLoginButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
+                            <FacebookLoginButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
+                            <TwitterLoginButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
+                            <GithubLoginButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
+                            <MicrosoftLoginButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+            <h2 className="text-2xl font-bold mb-6 text-center">Paiement</h2>
+            <form onSubmit={handleSubmit}>
+                {/* <CardElement
+                    options={{
+                        style: {
+                            base: {
+                                fontSize: '16px',
+                                color: '#424770',
+                                '::placeholder': {
+                                    color: '#aab7c4',
+                                },
+                            },
+                            invalid: {
+                                color: '#9e2146',
+                            },
+                        },
+                    }}
+                    className="mb-6 p-3 border border-gray-300 rounded-md"
+                />
+                {paymentError && (
+                    <p className="text-red-500 mb-4 text-center">{paymentError}</p>
+                )}
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="submit"
+                    disabled={!stripe || isProcessing}
+                    className={`w-full bg-primary text-white font-semibold py-3 px-4 rounded-md shadow-sm transition duration-300 ${
+                        isProcessing || !stripe ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-dark'
+                    }`}
+                >
+                    {isProcessing ? 'Traitement en cours...' : 'Payer'}
+                </motion.button> */}
+            </form>
+        </div>
+    );
+};
+
+export default PaymentComponent;

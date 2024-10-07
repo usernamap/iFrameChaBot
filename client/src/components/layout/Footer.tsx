@@ -3,11 +3,14 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+
 
 const Footer: React.FC = () => {
     const [email, setEmail] = useState('');
     const [hoveredIcon, setHoveredIcon] = useState<string | null>(null);
+    const { user } = useAuth();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -18,9 +21,11 @@ const Footer: React.FC = () => {
 
     const navItems = [
         { name: 'Accueil', href: '/' },
-        { name: 'Dashboard', href: '/dashboard' },
         { name: 'Créer', href: '/customize' },
-        { name: 'Profil', href: '/profile' },
+        ...(user ? [
+            { name: 'Dashboard', href: '/dashboard' },
+            { name: 'Profil', href: '/profile' },
+        ] : []),
     ];
 
     const socialIcons = [

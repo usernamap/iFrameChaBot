@@ -13,7 +13,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         if (!user) {
-            router.push('/customize');
+            router.push('/');
         } else {
             const fetchChatbots = async () => {
                 try {

@@ -12,21 +12,40 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
+          // Content-Security-Policy désactivée
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; media-src 'self' blob:; connect-src 'self' https://api.stripe.com https://r.stripe.com https://aliatech.fr http://localhost:3002/; script-src 'self' 'unsafe-eval' 'unsafe-inline' http://localhost:3002/; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
+            value: `
+              default-src * data: blob: 'unsafe-inline' 'unsafe-eval';
+              connect-src *;
+              script-src * 'unsafe-inline' 'unsafe-eval';
+              style-src * 'unsafe-inline';
+              img-src * data: blob:;
+              font-src *;
+              frame-src *;
+            `.replace(/\s+/g, ' ').trim()
           },
+
+          // X-Frame-Options désactivée
           {
             key: 'X-Frame-Options',
-            value: 'DENY',
+            value: 'ALLOWALL',
           },
+
+          // Cross-Origin-Opener-Policy désactivée
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'unsafe-none',
+          },
+
+          // Autres en-têtes désactivés ou allégés
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
           },
           {
             key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
+            value: 'no-referrer',
           },
         ],
       },

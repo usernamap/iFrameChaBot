@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
 import Link from 'next/link';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogIn, LogOut } from 'lucide-react';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/router';
 
 const Navbar: React.FC = () => {
     const { scrollY } = useScroll();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
+    const router = useRouter();
 
     useMotionValueEvent(scrollY, "change", (latest) => {
         setIsScrolled(latest > 50);
@@ -25,6 +27,15 @@ const Navbar: React.FC = () => {
     ];
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+    const handleAuth = async () => {
+        if (user) {
+            await logout();
+            router.push('/');
+        } else {
+            router.push('/login');
+        }
+    };
 
     return (
         <motion.header
@@ -51,7 +62,7 @@ const Navbar: React.FC = () => {
                             <span className="ml-2">Aliatech</span>
                         </Link>
                     </motion.div>
-                    <nav className="hidden md:block">
+                    <nav className="hidden md:flex items-center space-x-8">
                         <ul className="flex space-x-8">
                             {navItems.map((item) => (
                                 <motion.li key={item.name} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -64,6 +75,24 @@ const Navbar: React.FC = () => {
                                 </motion.li>
                             ))}
                         </ul>
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleAuth}
+                            className={`flex items-center text-sm font-medium ${isScrolled ? 'text-gray-800 hover:text-blue-600' : 'text-gray-900 hover:text-blue-200'}`}
+                        >
+                            {user ? (
+                                <>
+                                    <LogOut size={20} className="mr-1" />
+                                    Déconnexion
+                                </>
+                            ) : (
+                                <>
+                                    <LogIn size={20} className="mr-1" />
+                                    Connexion
+                                </>
+                            )}
+                        </motion.button>
                     </nav>
                     <div className="md:hidden">
                         <button
@@ -99,6 +128,20 @@ const Navbar: React.FC = () => {
                                 </Link>
                             </motion.li>
                         ))}
+                        <motion.li
+                            whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <button
+                                onClick={() => {
+                                    handleAuth();
+                                    setIsMenuOpen(false);
+                                }}
+                                className="w-full text-left block px-4 py-2 text-gray-900 hover:text-blue-600"
+                            >
+                                {user ? 'Déconnexion' : 'Connexion'}
+                            </button>
+                        </motion.li>
                     </ul>
                 </motion.div>
             )}
