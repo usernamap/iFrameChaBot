@@ -1,21 +1,35 @@
-MIT License
+LICENCE DE PROPRIÉTÉ EXCLUSIVE POUR UN USAGE RÉSERVÉ AUX CONDITIONS STRICTES DE L'ENTREPRISE 
 
-Copyright (c) 2024 LucasBld
+1. Propriété Intellectuelle du Code Source
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+L'intégralité du code source, y compris mais sans s'y limiter, les algorithmes, les architectures, les schémas conceptuels, la documentation technique, ainsi que l'ensemble des ressources dérivées, constitue une propriété intellectuelle exclusive de AliatechGroup. La présente licence n'implique en aucun cas un transfert de la propriété des actifs, mais octroie uniquement un droit d'utilisation restreint, rigoureusement limité aux conditions spécifiées.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+2. Droits d'Utilisation
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+L'utilisateur se voit octroyer une licence d'utilisation non exclusive, incessible et strictement limitée, visant l'utilisation du logiciel aux fins spécifiées dans le cadre du contrat principal convenu avec AliatechGroup. Toute autre forme d'utilisation, y compris, mais sans s'y limiter, la reproduction, la modification, la redistribution, ou la commercialisation du logiciel ou de ses composants, sans une autorisation préalable expresse et écrite de AliatechGroup, est formellement prohibée. De plus, tout droit conféré à l'utilisateur est subordonné au strict respect des termes et conditions de cette licence.
+
+3. Obligation de Confidentialité
+
+L'utilisateur s'engage à maintenir la confidentialité absolue de tout code source et à mettre en œuvre des mesures de protection raisonnables et adéquates pour prévenir toute divulgation non autorisée à des tiers. Toute divulgation, intentionnelle ou non, qui violerait cette obligation de confidentialité pourra entraîner des poursuites civiles et, potentiellement, la résiliation immédiate de la licence sans préavis. L'utilisateur est tenu de prendre toutes les mesures nécessaires pour protéger l'intégrité et la confidentialité de cette propriété intellectuelle.
+
+4. Déclarations et Garanties
+
+AliatechGroup garantit être le détenteur unique et légitime de tous les droits de propriété intellectuelle afférents au code source, et atteste que le logiciel ne porte atteinte à aucun droit appartenant à des tiers. Cependant, AliatechGroup ne fournit aucune garantie, explicite ou implicite, quant à l'absence d'anomalies, de défauts techniques, ou de bogues dans le logiciel. Le logiciel est fourni "en l'état", et l'utilisateur reconnaît qu'aucune assurance n'est donnée quant à sa parfaite adéquation à un besoin spécifique.
+
+5. Limitation de Responsabilité
+
+En aucune circonstance, AliatechGroup ne pourra être tenue responsable de tout dommage indirect, consécutif, exemplaire ou spécial, y compris, sans s'y limiter, les pertes de profits, les interruptions d'activité, ou toute autre forme de perte financière découlant de l'utilisation ou de l'impossibilité d'utiliser le logiciel. Cette limitation s'applique même dans le cas où AliatechGroup aurait été informée de la possibilité de survenance de tels dommages. La responsabilité totale de AliatechGroup, à quelque titre que ce soit, sera strictement limitée au montant des redevances payées par l'utilisateur pour l'utilisation du logiciel.
+
+6. Durée, Résiliation et Conséquences
+
+La présente licence prend effet à compter de la date de signature et restera valide jusqu'à sa résiliation par l'une des parties. AliatechGroup se réserve le droit de résilier cette licence immédiatement en cas de manquement par l'utilisateur à l'une des dispositions prévues. À la résiliation, l'utilisateur est tenu de cesser toute utilisation du logiciel, de supprimer ou de détruire irréversiblement toutes les copies en sa possession, ainsi que de fournir une attestation écrite confirmant la destruction desdits exemplaires. Les dispositions relatives à la confidentialité et à la limitation de responsabilité demeureront en vigueur après la résiliation.
+
+7. Droit Applicable et Juridiction Compétente
+
+La présente licence est régie par, et doit être interprétée conformément aux lois en vigueur en France. En cas de litige relatif à cette licence, les parties conviennent que la juridiction compétente sera celle des tribunaux situés à Paris, à l'exclusion de toute autre. L'utilisateur reconnaît que toute violation des termes de la présente licence peut entraîner des dommages irréparables à AliatechGroup, justifiant ainsi des mesures injonctives en plus de tout autre recours légal disponible.
+
+AliatechGroup
+
+Date : 07/10/2024
+
+Nom et Signature : M.Blanchard - Président Directeur Général d'AliatechGroup
