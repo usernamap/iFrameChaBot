@@ -25,7 +25,7 @@ export interface ChatbotConfig {
     openingBubbleWidth?: string;
     openingBubbleHeight?: string;
     openingBubbleIcon?: File | string;
-    animateOpenClose?: boolean; 
+    animateOpenClose?: boolean;
     sendButtonIcon?: File | string;
     darkModeSunLogo?: File | string;
     darkModeMoonLogo?: File | string;
@@ -110,15 +110,15 @@ export interface ChatbotConfig {
 export interface TypingAnimationConfig {
     typingAnimationType?: 'animation' | 'texte' | 'logo';
     typingText?: string;
-    typingLogo?: File | string; 
-    typingAnimationColor?: string; 
-    typingAnimationSize?: number;  
+    typingLogo?: File | string;
+    typingAnimationColor?: string;
+    typingAnimationSize?: number;
 }
 
 export interface TTSConfig {
     availableVoices: string[];
     enabledVoices: {
-        [key: string]: boolean; 
+        [key: string]: boolean;
     };
     defaultVoice: string;
     defaultSpeed: number;
@@ -231,10 +231,55 @@ export interface CompanyInfo {
     name: string;
     industry: string;
     description: string;
-    products: string;
-    services: string;
-    targetAudience: string;
-    faq: Array<{ question: string; answer: string }>;
+    location: string;
+    website: string;
+    contact: {
+        phone: string;
+        email: string;
+    };
+    services: string[];
+    targetAudience: string[];
+    competitors: string[];
+    brandVoice: string;
+    frequentlyAskedQuestions: string[];
+    values: string[];
+    socialMediaLinks: {
+        facebook: string;
+        twitter: string;
+        linkedin: string;
+        instagram: string;
+    };
+    policies: {
+        privacyPolicy: string;
+        returnPolicy: string;
+        termsOfService: string;
+    };
+    testimonials: string[];
+    team: TeamMember[];
+    locationDetails: LocationDetails;
+    otherInfo?: {
+        companyHistory?: string;
+        companyCulture?: string;
+        certificationsAwards?: string[];
+        futureProjects?: string[];
+        additionalInfo?: string;
+    };
+}
+
+export interface TeamMember {
+    name: string;
+    position: string;
+    bio: string;
+}
+
+export interface LocationDetails {
+    mainOffice: Office;
+    branches: Office[];
+}
+
+export interface Office {
+    address: string;
+    hours: string[];
 }
 
 export interface FormData extends Omit<ChatbotConfig, 'companyInfo'> {

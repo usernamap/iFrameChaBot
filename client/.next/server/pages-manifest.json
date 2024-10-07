@@ -2,7 +2,6 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/customize": "pages/customize.js",
   "/company-info": "pages/company-info.js",
-  "/": "pages/index.js"
+  "/recap-and-test": "pages/recap-and-test.js"
 }
