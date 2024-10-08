@@ -9,10 +9,9 @@ import usePersistedState from '@/contexts/usePersistedState';
 import axios from 'axios';
 import { ChatbotConfig, CompanyInfo } from '@/types';
 import ContactComponent from '@/components/payment/ContactComponent';
-import Image from 'next/image';
-import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 
-// Définir les styles pour le PDF
+// Styles pour le PDF
 const styles = StyleSheet.create({
     page: { padding: 30 },
     title: { fontSize: 24, marginBottom: 20, textAlign: 'center' },
@@ -22,6 +21,7 @@ const styles = StyleSheet.create({
     total: { fontSize: 16, marginTop: 20, textAlign: 'right' },
 });
 
+let orderNumber = Math.random().toString(36).substr(2, 9).toUpperCase();
 // Composant pour le PDF
 const InvoicePDF = ({ orderNumber, companyInfo, selectedSubscription }) => (
     <Document>
@@ -50,51 +50,52 @@ const SuccessPage: React.FC = () => {
     const [chatbotConfig] = usePersistedState<ChatbotConfig | null>('chatbotConfig', null);
     const [companyInfo] = usePersistedState<CompanyInfo | null>('companyInfo', null);
     const [selectedSubscription] = usePersistedState('selectedSubscription', null);
-    const [countdown, setCountdown] = usePersistedState('countdown', { hours: 23, minutes: 59, seconds: 59 });
-    const [isDataSent, setIsDataSent] = useState(false);
+    const [countdown, setCountdown] = useState({ hours: 0, minutes: 0, seconds: 0 });
+    const [isServerAvailable, setIsServerAvailable] = useState(true); // Nouvel état pour gérer la disponibilité du serveur
     const [showContactModal, setShowContactModal] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
-    const [orderNumber] = usePersistedState('orderNumber', Math.random().toString(36).substr(2, 9).toUpperCase());
 
+    // Récupérer le décompte depuis le serveur
     useEffect(() => {
-        const timer = setInterval(() => {
+        const fetchCountdown = async () => {
+            try {
+                const response = await axios.get('http://localhost:3002/api/countdown/countdown');
+                if (response.data && response.data.hours !== null) {
+                    setCountdown({
+                        hours: response.data.hours,
+                        minutes: response.data.minutes,
+                        seconds: response.data.seconds,
+                    });
+                    setIsServerAvailable(true); // Serveur disponible
+                }
+            } catch (error) {
+                console.error('Erreur lors de la récupération du décompte:', error);
+                setIsServerAvailable(false); // Serveur indisponible
+            }
+        };
+
+        fetchCountdown();
+
+        // Mettre à jour le décompte toutes les secondes côté client en fonction de la valeur récupérée
+        const interval = setInterval(() => {
             setCountdown(prevCountdown => {
-                if (prevCountdown.seconds > 0) {
-                    return { ...prevCountdown, seconds: prevCountdown.seconds - 1 };
-                } else if (prevCountdown.minutes > 0) {
-                    return { ...prevCountdown, minutes: prevCountdown.minutes - 1, seconds: 59 };
-                } else if (prevCountdown.hours > 0) {
-                    return { hours: prevCountdown.hours - 1, minutes: 59, seconds: 59 };
+                const { hours, minutes, seconds } = prevCountdown;
+                if (seconds > 0) {
+                    return { ...prevCountdown, seconds: seconds - 1 };
+                } else if (minutes > 0) {
+                    return { hours, minutes: minutes - 1, seconds: 59 };
+                } else if (hours > 0) {
+                    return { hours: hours - 1, minutes: 59, seconds: 59 };
                 } else {
-                    clearInterval(timer);
                     return prevCountdown;
                 }
             });
         }, 1000);
 
-        return () => clearInterval(timer);
+        return () => clearInterval(interval); // Nettoyer l'intervalle
     }, []);
 
-    useEffect(() => {
-        const sendDataToServer = async () => {
-            if (!isDataSent && chatbotConfig && companyInfo && selectedSubscription) {
-                try {
-                    const response = await axios.post('http://localhost:3002/api/order', {
-                        chatbotConfig,
-                        companyInfo,
-                        selectedSubscription,
-                        orderNumber
-                    });
-                    console.log('Données envoyées avec succès:', response.data);
-                    setIsDataSent(true);
-                } catch (error) {
-                    console.error('Erreur lors de l\'envoi des données:', error);
-                }
-            }
-        };
 
-        sendDataToServer();
-    }, [chatbotConfig, companyInfo, selectedSubscription, isDataSent, orderNumber]);
 
     if (!chatbotConfig || !companyInfo || !selectedSubscription) {
         router.push('/customize');
@@ -151,34 +152,39 @@ const SuccessPage: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="text-center mb-6">
-                        <p className="text-lg font-semibold mb-2">Temps estimé avant la livraison :</p>
-                        <div className="text-4xl font-bold text-primary">
-                            {countdown.hours.toString().padStart(2, '0')}:
-                            {countdown.minutes.toString().padStart(2, '0')}:
-                            {countdown.seconds.toString().padStart(2, '0')}
+                    {/* Condition pour afficher le décompte uniquement si le serveur est disponible */}
+                    {isServerAvailable ? (
+                        <div className="text-center mb-6">
+                            <p className="text-lg font-semibold mb-2">Temps estimé avant la livraison :</p>
+                            <div className="text-4xl font-bold text-primary">
+                                {countdown.hours !== undefined && countdown.minutes !== undefined && countdown.seconds !== undefined
+                                    ? `${countdown.hours.toString().padStart(2, '0')}:
+                                        ${countdown.minutes.toString().padStart(2, '0')}:
+                                        ${countdown.seconds.toString().padStart(2, '0')}`
+                                    : '00:00:00'}
+                            </div>
+                            <p className="text-sm text-gray-600 mt-2">
+                                Date de livraison estimée : {format(addDays(new Date(), 1), 'dd MMMM yyyy à HH:mm', { locale: fr })}
+                            </p>
                         </div>
-                        <p className="text-sm text-gray-600 mt-2">
-                            Date de livraison estimée : {format(addDays(new Date(), 1), 'dd MMMM yyyy à HH:mm', { locale: fr })}
-                        </p>
-                    </div>
+                    ) : (
+                        <div className="text-center text-red-500">Impossible de récupérer le décompte, réessayez plus tard.</div>
+                    )}
+
 
                     <div className="flex justify-center space-x-4">
                         <PDFDownloadLink
                             document={<InvoicePDF orderNumber={orderNumber} companyInfo={companyInfo} selectedSubscription={selectedSubscription} />}
                             fileName="facture_aliatech.pdf"
                         >
-
                             <motion.button
                                 className="bg-secondary text-white px-6 py-2 rounded-full hover:bg-secondary-dark transition-colors flex items-center"
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                            // disabled={loading}
                             >
                                 <Icons.Download />
                                 Télécharger la facture PDF
                             </motion.button>
-
                         </PDFDownloadLink>
                         <motion.button
                             onClick={() => setShowContactModal(true)}
@@ -312,7 +318,7 @@ const SuccessPage: React.FC = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                     >
-                        <Icons.Phone />‎‎
+                        <Icons.Phone />
                         Contactez-nous
                     </motion.button>
                 </motion.div>

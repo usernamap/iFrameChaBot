@@ -46,7 +46,7 @@ export default function Payment() {
     useEffect(() => {
         const loadData = () => {
             if (!chatbotConfig || !companyInfo) {
-                router.push('/customize');
+                router.push('/payment');
             } else {
                 setIsLoading(false);
             }

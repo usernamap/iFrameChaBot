@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { format, addMonths, addWeeks } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useRouter } from 'next/router';
+import axios from 'axios';
 
 interface PromoCode {
     code: string;
@@ -45,6 +46,10 @@ const PaymentSummaryComponent: React.FC<PaymentSummaryComponentProps> = ({
     const [discountAmount, setDiscountAmount] = usePersistedState('discountAmount', 0);
     const [totalPrice, setTotalPrice] = usePersistedState('totalPrice', selectedSubscription?.price || 0);
     const [autoRenew, setAutoRenew] = usePersistedState('autoRenew', true);
+    const [orderNumber] = usePersistedState('orderNumber', Math.random().toString(36).substr(2, 9).toUpperCase());
+    const [isDataSent, setIsDataSent] = useState(false);
+
+
 
     useEffect(() => {
         if (selectedSubscription) {
@@ -66,14 +71,25 @@ const PaymentSummaryComponent: React.FC<PaymentSummaryComponentProps> = ({
             // Redirection vers la page success pour les périodes gratuites
             setTimeout(() => {
                 router.push('/success');
+                sendDataToServer();
+                startCountdown();
             }, 1000);
         } else {
             // Simulation de l'implémentation de Stripe
             console.log('Implémentation future de Stripe : Paiement de', totalPrice.toFixed(2), '€');
-            setTimeout(() => {
-                setIsProcessing(false);
-                toast.error("Impossible de traiter le paiement. Veuillez réessayer plus tard ou contactez le support.");
-            }, 1000);
+            let stripe = false
+            if (stripe) {
+                setTimeout(() => {
+                    onPaymentSuccess();
+                    sendDataToServer();
+                    startCountdown();
+                }, 2000);
+            } else {
+                setTimeout(() => {
+                    setIsProcessing(false);
+                    toast.error("Impossible de traiter le paiement. Veuillez réessayer plus tard ou contactez le support.");
+                }, 1000);
+            }
         }
     };
 
@@ -106,6 +122,36 @@ const PaymentSummaryComponent: React.FC<PaymentSummaryComponentProps> = ({
         }
 
         return format(endDate, "d MMMM yyyy", { locale: fr });
+    };
+
+    const sendDataToServer = async () => {
+        if (!isDataSent && chatbotConfig && companyInfo && selectedSubscription) {
+            try {
+                const response = await axios.post('http://localhost:3002/api/order/order', {
+                    chatbotConfig,
+                    companyInfo,
+                    selectedSubscription,
+                    orderNumber
+                });
+                console.log('Données envoyées avec succès:', response.data);
+                setIsDataSent(true);
+            } catch (error) {
+                console.error('Erreur lors de l\'envoi des données:', error);
+            }
+        }
+    };
+
+    const startCountdown = async () => {
+        try {
+            const response = await axios.post('http://localhost:3002/api/countdown/startCountdown', {
+                hours: 1,
+                minutes: 30,
+                seconds: 0,
+            });
+            console.log('Décompte démarré:', response.data);
+        } catch (error) {
+            console.error('Erreur lors du démarrage du décompte:', error);
+        }
     };
 
     if (!selectedSubscription) {

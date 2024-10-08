@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '@/components/layout/index';
 import DashboardChatbotList from '@/components/dashboard/DashboardChatbotList';
-import { getUserChatbots } from '@/utils/api';
+// import { getUserChatbots } from '@/utils/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { Chatbot } from '@/types';
 
@@ -17,8 +17,8 @@ export default function Dashboard() {
         } else {
             const fetchChatbots = async () => {
                 try {
-                    const userChatbots = await getUserChatbots();
-                    setChatbots(userChatbots);
+                    // const userChatbots = await getUserChatbots();
+                    // setChatbots(userChatbots);
                 } catch (error) {
                     console.error('Error fetching chatbots:', error);
                 }
@@ -28,8 +28,8 @@ export default function Dashboard() {
     }, [user, router]);
 
     const handleChatbotDeleted = async () => {
-        const updatedChatbots = await getUserChatbots();
-        setChatbots(updatedChatbots);
+        // const updatedChatbots = await getUserChatbots();
+        // setChatbots(updatedChatbots);
     };
 
     if (!user) {
