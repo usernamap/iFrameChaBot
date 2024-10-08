@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { auth, emailProvider, googleProvider, facebookProvider, githubProvider, twitterProvider, microsoftProvider, subscribeToTopic } from '../config/firebase';
+import { auth, emailProvider, googleProvider, facebookProvider, githubProvider, twitterProvider, microsoftProvider } from '../config/firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, User, AuthError, signInWithEmailAndPassword } from 'firebase/auth';
 
 interface AuthContextType {
@@ -21,13 +21,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        if (user) {
-            // S'abonner aux notifications pour les nouveaux ordres
-            subscribeToTopic(user.uid, 'new_orders');
-        }
-    }, [user]);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -129,7 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
     }, []);
 
-    const value = React.useMemo(() => ({
+    const value = {
         user,
         loading,
         error,
@@ -140,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loginWithTwitter,
         loginWithMicrosoft,
         logout
-    }), [user, loading, error]);
+    };
 
     return (
         <AuthContext.Provider value={value}>
