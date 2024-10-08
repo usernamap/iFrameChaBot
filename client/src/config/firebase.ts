@@ -16,10 +16,15 @@ let messaging: Messaging | null = null;
 
 if (typeof window !== 'undefined') {
     firebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-    messaging = getMessaging(firebaseApp);
+    try {
+        messaging = getMessaging(firebaseApp);
+    } catch (error) {
+        console.error('Error initializing messaging:', error);
+    }
 } else {
     firebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 }
+
 
 const auth = getAuth(firebaseApp);
 const emailProvider = new EmailAuthProvider();
