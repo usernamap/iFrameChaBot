@@ -164,15 +164,15 @@ const RecapComponent: React.FC<RecapComponentProps> = ({
             {/* Section des actions principales */}
             <div className="mt-12 space-y-6">
                 {/* Bouton "Payer" ultra visible */}
-                <div className="flex justify-center">
+                <div className="">
                     <Link href="/payment" passHref>
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="bg-blue-600 text-white px-8 py-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center text-lg font-semibold pulse-animation"
+                            className="w-full text-center justify-center flex items-center bg-blue-600 text-white px-8 py-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center text-lg font-semibold pulse-animation"
                         >
                             <Icons.Payment />
-                            ‎ Payer
+                            ‎  ‎ Payer
                         </motion.button>
                     </Link>
                 </div>
@@ -193,7 +193,7 @@ const RecapComponent: React.FC<RecapComponentProps> = ({
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="bg-green-500 text-white px-6 py-3 rounded-full hover:bg-green-600 transition-colors flex items-center"
+                            className="bg-green-500 text-white px-6 py-3 rounded-full hover:bg-green-600 transition-colors flex items-center  "
                         >
                             Personnaliser davantage ‎
                             <Icons.Settings />

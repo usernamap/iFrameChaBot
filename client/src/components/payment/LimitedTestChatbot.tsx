@@ -32,8 +32,8 @@ const LimitedTestChatbot: React.FC<LimitedTestChatbotProps> = ({
 
     const getTipMessage = () => {
         if (messageCount === MAX_MESSAGES - 5) return "Plus que 5 messages !";
-        if (messageCount === MAX_MESSAGES - 2) return "Attention, 2 messages restants !";
-        if (messageCount >= MAX_MESSAGES) return "Limite atteinte. Passez à l'étape suivante !";
+        if (messageCount === MAX_MESSAGES - 2) return "Attention, 2 messages restants ! On dirait que vous aimez discuter avec votre nouvel assistant 😊";
+        if (messageCount >= MAX_MESSAGES) return "Limite atteinte. Pour discuter davantage, payez pour débloquer l'accès complet à votre assistant.";
         return "";
     };
 
@@ -94,12 +94,12 @@ const LimitedTestChatbot: React.FC<LimitedTestChatbotProps> = ({
             {messageCount >= MAX_MESSAGES && (
                 <motion.button
                     onClick={onNextStep}
-                    className="w-full bg-green-500 text-white px-6 py-3 rounded-lg font-bold text-lg shadow-lg hover:bg-green-600 transition duration-300 ease-in-out flex items-center justify-center"
+                    className="w-full text-center justify-center flex items-center bg-blue-600 text-white px-8 py-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center text-lg font-semibold pulse-animation"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                 >
-                    Passer à l'étape suivante
-                    <Icons.ArrowRight />
+                    <Icons.Payment />
+                    ‎  ‎ Payer
                 </motion.button>
             )}
         </div>
