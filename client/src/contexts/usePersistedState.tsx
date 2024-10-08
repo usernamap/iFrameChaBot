@@ -4,15 +4,20 @@ function usePersistedState<T>(key: string, defaultValue: T): [T, React.Dispatch<
     const [state, setState] = useState<T>(() => {
         if (typeof window !== 'undefined') {
             try {
+                // Vérifiez si l'accès à localStorage est possible
+                const testKey = '__test__';
+                localStorage.setItem(testKey, 'test');
+                localStorage.removeItem(testKey);
+
                 const persistedState = localStorage.getItem(key);
                 if (persistedState === null) {
                     return defaultValue;
                 }
-                // Essayez de parser, si ça échoue, retournez la valeur brute
                 const parsedState = JSON.parse(persistedState);
                 return parsedState;
             } catch (error) {
-                console.warn(`Error reading ${key} from localStorage:`, error);
+                console.warn(`Error reading or writing ${key} in localStorage:`, error);
+                // Retourner la valeur par défaut si localStorage n'est pas accessible
                 return defaultValue;
             }
         }

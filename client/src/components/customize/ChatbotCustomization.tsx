@@ -35,7 +35,7 @@ const ChatbotCustomization: React.FC<ChatbotCustomizationProps> = ({
     activeTab,
     setActiveTab,
 }) => {
-    const [statusType, setStatusType] = usePersistedState('statusType', config.statusConfig?.type || 'none');
+    const [statusType, setStatusType] = usePersistedState('statusType', config.statusConfig.type || 'none');
     const [showTooltip, setShowTooltip] = useState(false);
     const [tooltipContent, setTooltipContent] = useState('');
     const audioRef = useRef<HTMLAudioElement | null>(null);

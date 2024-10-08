@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Icons } from '@/components/common/Icons';
+import usePersistedState from '@/contexts/usePersistedState';
 
 interface SubscriptionOption {
     name: string;
@@ -48,16 +49,28 @@ const subscriptionOptions: SubscriptionOption[] = [
 
 interface SubscriptionOptionsProps {
     onSelect: (option: SubscriptionOption) => void;
-    selectedSubscription: SubscriptionOption | null;
 }
 
-const SubscriptionOptions: React.FC<SubscriptionOptionsProps> = ({ onSelect, selectedSubscription }) => {
+const SubscriptionOptions: React.FC<SubscriptionOptionsProps> = ({ onSelect }) => {
+    const [selectedSubscription, setSelectedSubscription] = usePersistedState<SubscriptionOption | null>('selectedSubscription', null);
+
+    useEffect(() => {
+        if (selectedSubscription) {
+            onSelect(selectedSubscription);
+        }
+    }, [selectedSubscription, onSelect]);
+
+    const handleSelect = (option: SubscriptionOption) => {
+        setSelectedSubscription(option);
+        onSelect(option);
+    };
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             {subscriptionOptions.map((option, index) => (
                 <motion.div
                     key={index}
-                    className={`bg-white rounded-lg shadow-lg p-6 border-2 relative ${selectedSubscription === option ? 'border-primary' : 'border-transparent'
+                    className={`bg-white rounded-lg shadow-lg p-6 border-2 relative ${selectedSubscription?.name === option.name ? 'border-primary' : 'border-transparent'
                         } ${option.recommended ? 'ring-2 ring-secondary' : ''}`}
                     whileHover={{ scale: 1.03 }}
                     transition={{ duration: 0.2 }}
@@ -78,15 +91,15 @@ const SubscriptionOptions: React.FC<SubscriptionOptionsProps> = ({ onSelect, sel
                         ))}
                     </ul>
                     <motion.button
-                        className={`w-full py-3 px-4 rounded-full text-lg font-semibold ${selectedSubscription === option
+                        className={`w-full py-3 px-4 rounded-full text-lg font-semibold ${selectedSubscription?.name === option.name
                             ? 'bg-primary text-white'
                             : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                             } transition-colors duration-300`}
-                        onClick={() => onSelect(option)}
+                        onClick={() => handleSelect(option)}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                     >
-                        {selectedSubscription === option ? 'Sélectionné' : 'Choisir ce plan'}
+                        {selectedSubscription?.name === option.name ? 'Sélectionné' : 'Choisir ce plan'}
                     </motion.button>
                 </motion.div>
             ))}

@@ -11,6 +11,17 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Icons } from '@/components/common/Icons';
 import usePersistedState from '@/contexts/usePersistedState';
 import ContactComponent from '@/components/payment/ContactComponent';
+import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import EmailLoginForm from '@/components/auth/EmailLoginForm';
+import GoogleLoginButton from '@/components/auth/GoogleLoginButton';
+import FacebookLoginButton from '@/components/auth/FacebookLoginButton';
+import TwitterLoginButton from '@/components/auth/TwitterLoginButton';
+import GithubLoginButton from '@/components/auth/GithubLoginButton';
+import MicrosoftLoginButton from '@/components/auth/MicrosoftLoginButton';
+import FakeEmailButton from '@/components/auth/FakeEmailButton';
 
 export default function Payment() {
     const [chatbotConfig, setChatbotConfig] = usePersistedState<ChatbotConfig | null>('chatbotConfig', null);
@@ -19,7 +30,18 @@ export default function Payment() {
     const [selectedSubscription, setSelectedSubscription] = usePersistedState('selectedSubscription', null);
     const [autoUpgrade, setAutoUpgrade] = usePersistedState('autoUpgrade', false);
     const [showContactModal, setShowContactModal] = useState(false);
+    const { user } = useAuth();
     const router = useRouter();
+    const [error, setError] = useState<string | null>(null);
+
+
+    const handleLoginSuccess = () => {
+        router.push('/dashboard');
+    };
+
+    const handleLoginError = (errorMessage: string) => {
+        setError(errorMessage);
+    };
 
     useEffect(() => {
         const loadData = () => {
@@ -71,6 +93,46 @@ export default function Payment() {
         );
     }
 
+    if (!user) {
+        return (
+            <Layout title="Connexion">
+                <div className="flex items-center justify-center bg-gray-50 my-6 py-12 px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-md w-full space-y-8">
+                        <div>
+                            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                                Connectez-vous à votre compte
+                            </h2>
+                        </div>
+                        {error && (
+                            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                                <span className="block sm:inline">{error}</span>
+                            </div>
+                        )}
+                        <EmailLoginForm onSuccess={handleLoginSuccess} onError={handleLoginError} />
+                        <div className="mt-6">
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-gray-300" />
+                                </div>
+                                <div className="relative flex justify-center text-sm">
+                                    <span className="px-2 bg-gray-50 text-gray-500">Ou continuer avec</span>
+                                </div>
+                            </div>
+                            <div className="mt-6 grid grid-cols-2 gap-3">
+                                <FakeEmailButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
+                                <GoogleLoginButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
+                                <FacebookLoginButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
+                                <TwitterLoginButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
+                                <GithubLoginButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
+                                <MicrosoftLoginButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Layout>
+        );
+    }
+
     return (
         <Layout title="Finaliser votre commande">
             <div className="container mx-auto px-4 py-12">
@@ -91,7 +153,7 @@ export default function Payment() {
                     Choisissez l'abonnement qui correspond le mieux à vos besoins et commencez dès aujourd'hui !
                 </motion.p>
 
-                <SubscriptionOptions onSelect={setSelectedSubscription} selectedSubscription={selectedSubscription} />
+                <SubscriptionOptions onSelect={setSelectedSubscription} />
 
                 <div className="flex flex-col lg:flex-row justify-between gap-8 mb-12">
                     <div className="w-full lg:w-1/2">
@@ -124,13 +186,12 @@ export default function Payment() {
                     <p className="text-lg mb-4">Vous avez des questions ? Nous sommes là pour vous aider !</p>
                     <motion.button
                         id="contact-us"
-                        className="bg-secondary px-6 py-2 rounded-full hover:bg-secondary-dark transition-colors flex items-center mx-auto"
+                        className="bg-secondary text-black px-6 py-2 rounded-full hover:bg-secondary-dark transition-colors flex items-center mx-auto"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setShowContactModal(true)}
-                        animate={{ opacity: 1 }}
                     >
-                        <Icons.Phone />‎‎
+                        <Icons.Phone />  ‎‎
                         Contactez-nous
                     </motion.button>
                 </motion.div>
@@ -140,6 +201,7 @@ export default function Payment() {
                     <ContactComponent onClose={() => setShowContactModal(false)} />
                 )}
             </AnimatePresence>
+            <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
         </Layout>
     );
 }

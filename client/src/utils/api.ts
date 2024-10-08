@@ -30,10 +30,10 @@ export const getChatbotConfig = async (chatbotId: string) => {
     return response.data;
 };
 
-export const getUserChatbots = async () => {
-    const response = await api.get('/user/chatbots');
-    return response.data;
-};
+// export const getUserChatbots = async () => {
+//     const response = await api.get('/user/chatbots');
+//     return response.data;
+// };
 
 export const createChatbot = async (chatbotData: any) => {
     const response = await api.post('/chatbot', chatbotData);

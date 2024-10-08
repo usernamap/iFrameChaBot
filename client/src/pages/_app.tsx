@@ -7,6 +7,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import '@/styles/globals.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Toaster } from 'react-hot-toast';
 
 // const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -18,6 +19,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             <div id="portal-root"></div>
             {/* </Elements> */}
             <ToastContainer />
+            <Toaster />
         </AuthProvider>
     );
 }
