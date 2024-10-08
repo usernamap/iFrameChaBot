@@ -579,7 +579,7 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config, useRealAPI = fa
                             <div className="flex items-center">
                                 <div className='flex flex-col'>
                                     <h3 className="font-bold" style={{ color: config.textColor, fontSize: config.fontSize, }}>{config.headerTitle}</h3>
-                                    <p className="text-sm opacity-80" style={{ color: config.textColor }}>
+                                    <p className="text-sm opacity-80" style={{ color: config.textColor, fontSize: config.fontSize }}>
                                         {config.STATUS_MESSAGES[assistantStatus]}
                                     </p>
                                 </div>

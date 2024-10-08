@@ -1,156 +1,71 @@
 import React, { useState } from 'react';
-import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
-import { useAuth } from '@/contexts/AuthContext';
-import { ChatbotConfig } from '@/types';
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/router';
-import EmailLoginForm from '@/components/auth/EmailLoginForm';
-import FakeEmailButton from '@/components/auth/FakeEmailButton';
-import GoogleLoginButton from '@/components/auth/GoogleLoginButton';
-import FacebookLoginButton from '@/components/auth/FacebookLoginButton';
-import TwitterLoginButton from '@/components/auth/TwitterLoginButton';
-import GithubLoginButton from '@/components/auth/GithubLoginButton';
-import MicrosoftLoginButton from '@/components/auth/MicrosoftLoginButton';
+import { ChatbotConfig, CompanyInfo } from '@/types/index';
 
 interface PaymentComponentProps {
     chatbotConfig: ChatbotConfig;
-    companyInfo: any;
+    companyInfo: CompanyInfo;
     onPaymentSuccess: () => void;
 }
 
-const PaymentComponent: React.FC<PaymentComponentProps> = ({
-    chatbotConfig,
-    companyInfo,
-    onPaymentSuccess,
-}) => {
-    // const stripe = useStripe();
-    // const elements = useElements();
-    const { user } = useAuth();
-    const [paymentError, setPaymentError] = useState<string | null>(null);
+const PaymentComponent: React.FC<PaymentComponentProps> = ({ chatbotConfig, companyInfo, onPaymentSuccess }) => {
     const [isProcessing, setIsProcessing] = useState(false);
-    const router = useRouter();
-    const [error, setError] = useState<string | null>(null);
 
-    const handleLoginSuccess = () => {
-        router.push('/dashboard');
+    const calculateTotal = () => {
+        // Même logique que dans RecapComponent
+        let total = 29.99;
+        if (chatbotConfig.enableTTS) total += 9.99;
+        if (chatbotConfig.enableDarkMode) total += 4.99;
+        return total.toFixed(2);
     };
 
-    const handleLoginError = (errorMessage: string) => {
-        setError(errorMessage);
-    };
-
-
-    const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault();
-        setPaymentError(null);
-
-        // if (!stripe || !elements || !user) {
-        //     return;
-        // }
-
+    const handlePayment = async () => {
         setIsProcessing(true);
-
-        // const cardElement = elements.getElement(CardElement);
-
-        // if (cardElement) {
-        //     try {
-        //         const { error, paymentMethod } = await stripe.createPaymentMethod({
-        //             type: 'card',
-        //             card: cardElement,
-        //         });
-
-        //         if (error) {
-        //             setPaymentError(error.message || 'Une erreur est survenue lors du paiement.');
-        //         } else {
-        //             console.log('[PaymentMethod]', paymentMethod);
-        //             // Ici, vous devriez envoyer le paymentMethod.id à votre serveur
-        //             // pour effectuer le paiement côté serveur.
-        //             // Après confirmation du paiement côté serveur :
-        //             onPaymentSuccess();
-        //         }
-        //     } catch (err) {
-        //         setPaymentError('Une erreur inattendue est survenue. Veuillez réessayer.');
-        //     } finally {
-        //         setIsProcessing(false);
-        //     }
-        // }
+        // Simuler un processus de paiement
+        setTimeout(() => {
+            setIsProcessing(false);
+            onPaymentSuccess();
+        }, 2000);
     };
-
-    if (!user) {
-        return (
-            <div className="flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-md w-full space-y-8">
-                    <div>
-                        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                            Connectez-vous à votre compte
-                        </h2>
-                    </div>
-                    {error && (
-                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                            <span className="block sm:inline">{error}</span>
-                        </div>
-                    )}
-                    <EmailLoginForm onSuccess={handleLoginSuccess} onError={handleLoginError} />
-                    <div className="mt-6">
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-gray-300" />
-                            </div>
-                            <div className="relative flex justify-center text-sm">
-                                <span className="px-2 bg-gray-50 text-gray-500">Ou continuer avec</span>
-                            </div>
-                        </div>
-                        <div className="mt-6 grid grid-cols-2 gap-3">
-                            <FakeEmailButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
-                            <GoogleLoginButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
-                            <FacebookLoginButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
-                            <TwitterLoginButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
-                            <GithubLoginButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
-                            <MicrosoftLoginButton onSuccess={handleLoginSuccess} onError={handleLoginError} />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     return (
-        <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold mb-6 text-center">Paiement</h2>
-            <form onSubmit={handleSubmit}>
-                {/* <CardElement
-                    options={{
-                        style: {
-                            base: {
-                                fontSize: '16px',
-                                color: '#424770',
-                                '::placeholder': {
-                                    color: '#aab7c4',
-                                },
-                            },
-                            invalid: {
-                                color: '#9e2146',
-                            },
-                        },
-                    }}
-                    className="mb-6 p-3 border border-gray-300 rounded-md"
-                />
-                {paymentError && (
-                    <p className="text-red-500 mb-4 text-center">{paymentError}</p>
-                )}
+        <motion.div
+            className="bg-white p-6 rounded-lg shadow-lg"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+        >
+            <h2 className="text-2xl font-bold mb-4">Paiement sécurisé</h2>
+            <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                    <span className="font-semibold">Total à payer :</span>
+                    <span className="text-2xl font-bold text-primary">{calculateTotal()}€</span>
+                </div>
+                <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded" role="alert">
+                    <p className="font-bold">Paiement sécurisé</p>
+                    <p>Toutes vos informations sont cryptées et sécurisées.</p>
+                </div>
+                <div className="space-y-2">
+                    <input type="text" placeholder="Numéro de carte" className="w-full p-2 border rounded" />
+                    <div className="flex space-x-2">
+                        <input type="text" placeholder="MM/AA" className="w-1/2 p-2 border rounded" />
+                        <input type="text" placeholder="CVC" className="w-1/2 p-2 border rounded" />
+                    </div>
+                </div>
                 <motion.button
+                    className={`w-full bg-primary text-white font-bold py-3 px-4 rounded ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-dark'}`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    type="submit"
-                    disabled={!stripe || isProcessing}
-                    className={`w-full bg-primary text-white font-semibold py-3 px-4 rounded-md shadow-sm transition duration-300 ${
-                        isProcessing || !stripe ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-dark'
-                    }`}
+                    onClick={handlePayment}
+                    disabled={isProcessing}
                 >
-                    {isProcessing ? 'Traitement en cours...' : 'Payer'}
-                </motion.button> */}
-            </form>
-        </div>
+                    {isProcessing ? 'Traitement en cours...' : 'Payer maintenant'}
+                </motion.button>
+                <p className="text-sm text-gray-600 text-center mt-4">
+                    En cliquant sur "Payer maintenant", vous acceptez nos conditions générales de vente.
+                </p>
+            </div>
+        </motion.div>
     );
 };
 
