@@ -158,7 +158,7 @@ const defaultConfig: ChatbotConfig = {
     },
     ttsToggleIcon: null,
     ttsIcon: null,
-    serverUrl: 'http://localhost:3002',
+    serverUrl: 'https://assistant.aliatech.fr',
     apiEndpoints: {
         chat: '/api/chatbot/chat',
         status: '/api/chatbot/status',

@@ -128,7 +128,7 @@ const PaymentSummaryComponent: React.FC<PaymentSummaryComponentProps> = ({
     const sendDataToServer = async () => {
         if (!isDataSent && chatbotConfig && companyInfo && selectedSubscription) {
             try {
-                const response = await axios.post('http://localhost:3002/api/order/order', {
+                const response = await axios.post('https://assistant.aliatech.fr/api/order/order', {
                     chatbotConfig,
                     companyInfo,
                     selectedSubscription,
@@ -144,7 +144,7 @@ const PaymentSummaryComponent: React.FC<PaymentSummaryComponentProps> = ({
 
     const startCountdown = async () => {
         try {
-            const response = await axios.post('http://localhost:3002/api/countdown/startCountdown', {
+            const response = await axios.post('https://assistant.aliatech.fr/api/countdown/startCountdown', {
                 hours: 1,
                 minutes: 30,
                 seconds: 0,

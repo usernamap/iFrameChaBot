@@ -196,7 +196,7 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config, useRealAPI = fa
             // Vérifiez si l'API est disponible au démarrage
             const checkApiAvailability = async () => {
                 try {
-                    const response = await fetch('http://localhost:3002/api/chatbot/chat', {
+                    const response = await fetch('https://assistant.aliatech.fr/api/chatbot/chat', {
                         method: 'HEAD',
                     });
                     if (!response.ok) {
@@ -224,7 +224,7 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config, useRealAPI = fa
         setPlayingMessageId(messageId);
 
         try {
-            const response = await fetch('http://localhost:3002/api/chatbot/tts', {
+            const response = await fetch('https://assistant.aliatech.fr/api/chatbot/tts', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -293,7 +293,7 @@ const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({ config, useRealAPI = fa
         try {
             if (useRealAPI) {
                 setIsTyping(true);
-                const response = await fetch('http://localhost:3002/api/chatbot/chat', {
+                const response = await fetch('https://assistant.aliatech.fr/api/chatbot/chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

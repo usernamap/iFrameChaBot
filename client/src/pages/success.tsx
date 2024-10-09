@@ -222,7 +222,7 @@ const SuccessPage: React.FC = () => {
     useEffect(() => {
         const fetchCountdown = async () => {
             try {
-                const response = await axios.get('http://localhost:3002/api/countdown/countdown');
+                const response = await axios.get('https://assistant.aliatech.fr/api/countdown/countdown');
                 if (response.data && response.data.hours !== null) {
                     const totalSeconds = response.data.hours * 3600 + response.data.minutes * 60 + response.data.seconds;
                     setCountdown({
@@ -274,7 +274,7 @@ const SuccessPage: React.FC = () => {
         setIsRestarting(true);
         setIsCountingDown(false); // Désactiver le compte à rebours pendant le redémarrage
         try {
-            const response = await axios.post('http://localhost:3002/api/countdown/startCountdown', {
+            const response = await axios.post('https://assistant.aliatech.fr/api/countdown/startCountdown', {
                 hours: 1, // Définissez les valeurs souhaitées pour le redémarrage
                 minutes: 30,
                 seconds: 0,

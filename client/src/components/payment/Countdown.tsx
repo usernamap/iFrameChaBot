@@ -8,7 +8,7 @@ const CountdownComponent = () => {
         // Fonction pour obtenir le temps restant depuis l'API
         const fetchCountdown = async () => {
             try {
-                const response = await axios.get('http://localhost:3002/api/countdown');
+                const response = await axios.get('https://assistant.aliatech.fr/api/countdown');
                 if (response.data) {
                     setCountdown({
                         hours: response.data.hours,
