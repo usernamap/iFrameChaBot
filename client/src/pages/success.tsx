@@ -55,11 +55,14 @@ const InvoicePDF = ({ orderNumber, companyInfo, selectedSubscription, appliedPro
     const tvaAmount = totalHT * 0.2;
     const totalTTC = totalHT + tvaAmount;
 
-    interface DisplayFreePeriodProps {
-        freeMonths: number;
-    }
 
-    const displayFreePeriod = ({ freeMonths }: DisplayFreePeriodProps): string => {
+    const displayFreePeriod = (freeMonths: number | null | undefined): string => {
+        // Vérification si freeMonths est bien un nombre et défini
+        if (typeof freeMonths !== 'number' || isNaN(freeMonths)) {
+            return 'N/A'; // Affiche 'N/A' si la valeur n'est pas valide
+        }
+
+        // Conversion en mois ou semaines
         if (freeMonths >= 1) {
             return `${freeMonths} mois`;
         } else {
@@ -67,6 +70,7 @@ const InvoicePDF = ({ orderNumber, companyInfo, selectedSubscription, appliedPro
             return `${weeks} ${weeks > 1 ? 'semaines' : 'semaine'}`;
         }
     };
+
 
     return (
         <Document>
@@ -116,7 +120,7 @@ const InvoicePDF = ({ orderNumber, companyInfo, selectedSubscription, appliedPro
                     {isFreeTrial ? (
                         <View style={styles.section}>
                             <Text style={styles.text}>
-                                Vous bénéficiez actuellement d'une période d'essai gratuite de {displayFreePeriod(appliedPromo.freeMonths)}. Aucun montant n'est dû pour cette période.
+                                Vous bénéficiez actuellement d'une période d'essai gratuite de {displayFreePeriod(appliedPromo?.freeMonths)}. Aucun montant n'est dû pour cette période.
                             </Text>
                         </View>
                     ) : (
