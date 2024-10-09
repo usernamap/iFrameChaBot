@@ -1,64 +1,155 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { Order } from '../interfaces/Order';
-import { ChatbotConfig } from '../interfaces/ChatbotConfig';
-import { CompanyInfo } from '../interfaces/CompanyInfo';
+import { ChatbotConfig, CompanyInfo } from '../interfaces/ChatbotConfig';
+import logger from '../utils/logger';
+import { sanitizeHtml, sanitizeJs, sanitizeCss } from '../utils/sanitizers';
+import { generateUniqueId } from '../utils/idGenerator';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 class IframeGeneratorService {
     private readonly templatePath: string;
     private readonly outputDir: string;
+    private readonly jsTemplatePath: string;
+    private readonly cssTemplatePath: string;
 
     constructor() {
         this.templatePath = path.join(__dirname, '../templates/chatbot-template.html');
+        this.jsTemplatePath = path.join(__dirname, '../templates/chatbot-template.js');
+        this.cssTemplatePath = path.join(__dirname, '../templates/chatbot-styles.css');
         this.outputDir = path.join(__dirname, '../public/iframes');
     }
 
     async generateIframe(order: Order): Promise<string> {
         try {
-            // Lire les templates
-            let htmlTemplate = await fs.readFile(this.templatePath, 'utf-8');
-            let jsTemplate = await fs.readFile(path.join(__dirname, '../templates/chatbot-template.js'), 'utf-8');
+            let htmlTemplate = await this.readFile(this.templatePath);
+            let jsTemplateContent = await this.readFile(this.jsTemplatePath);
+            let cssTemplate = await this.readFile(this.cssTemplatePath);
 
-            // Générer un ID unique
-            const uniqueId = `iframe-${order.orderNumber}`;
+            const uniqueId = generateUniqueId(order.orderNumber || 'default');
 
-            // Remplacer les placeholders dans les templates
-            htmlTemplate = this.replacePlaceholders(htmlTemplate, order.chatbotConfig, order.companyInfo, uniqueId);
-            console.log('Template JS avant remplacement:', jsTemplate);
-            jsTemplate = this.replacePlaceholders(jsTemplate, order.chatbotConfig, order.companyInfo, uniqueId);
-            console.log('Template JS après remplacement:', jsTemplate);
+            await this.generateTailwindCSS(cssTemplate, uniqueId);
+
+            // Injecter les configurations dans le HTML plutôt que dans le JS
+            htmlTemplate = this.replaceHtmlPlaceholders(htmlTemplate, order.chatbotConfig, order.companyInfo, uniqueId);
+            jsTemplateContent = this.replaceJsPlaceholders(jsTemplateContent, uniqueId);
+            cssTemplate = this.replaceCssPlaceholders(cssTemplate, order.chatbotConfig);
+
+            const jsTemplate = await this.transpileJs(jsTemplateContent, this.jsTemplatePath);
+
             const htmlFileName = `${uniqueId}.html`;
             const jsFileName = `${uniqueId}.js`;
+            const cssFileName = `${uniqueId}.css`;
 
-            const htmlPath = path.join(this.outputDir, htmlFileName);
-            const jsPath = path.join(this.outputDir, jsFileName);
+            await this.ensureDirectoryExists(this.outputDir);
 
-            // Écrire les fichiers
-            await fs.writeFile(htmlPath, htmlTemplate);
-            await fs.writeFile(jsPath, jsTemplate);
+            await this.writeFile(path.join(this.outputDir, htmlFileName), htmlTemplate);
+            await this.writeFile(path.join(this.outputDir, jsFileName), jsTemplate);
+            await this.writeFile(path.join(this.outputDir, cssFileName), cssTemplate);
 
-            // Retourner l'URL relative de l'iframe HTML
+            logger.info(`Fichiers générés : ${htmlFileName}, ${jsFileName}, ${cssFileName}`);
+
             return `/iframes/${htmlFileName}`;
         } catch (error) {
-            console.error('Erreur lors de la génération de l\'iframe:', error);
+            logger.error('Erreur lors de la génération de l\'iframe:', error);
             throw new Error('Impossible de générer l\'iframe');
         }
     }
 
-    private replacePlaceholders(template: string, config: ChatbotConfig, companyInfo: CompanyInfo, uniqueId: string): string {
-        // Pour le template JS, insérez les objets directement sans les entourer de guillemets supplémentaires
-        template = template.replace('{{CHATBOT_CONFIG}}', JSON.stringify(config, null, 2));
-        template = template.replace('{{COMPANY_INFO}}', JSON.stringify(companyInfo, null, 2));
+    private async generateTailwindCSS(cssContent: string, uniqueId: string): Promise<void> {
+        const tempCssPath = path.join(__dirname, `../temp/${uniqueId}.css`);
+        const outputCssPath = path.join(this.outputDir, `${uniqueId}.css`);
 
-        // Remplacer d'autres placeholders si nécessaire
-        template = template.replace('{{CHATBOT_TITLE}}', config.headerTitle || 'Assistant Virtuel');
-        template = template.replace('{{PRIMARY_COLOR}}', config.primaryColor || '#0000FF');
-        template = template.replace('{{TEXT_COLOR}}', config.textColor || '#FFFFFF');
-        template = template.replace('{{FONT_FAMILY}}', config.fontFamily || 'Arial, sans-serif');
-        template = template.replace('{{FONT_SIZE}}', config.fontSize || '14px');
-        template = template.replace(/\{\{UNIQUE_ID\}\}/g, uniqueId);
+        // Écrire le contenu CSS temporaire
+        await fs.writeFile(tempCssPath, cssContent);
 
-        return template;
+        // Exécuter Tailwind CLI
+        await execAsync(`npx tailwindcss -i ${tempCssPath} -o ${outputCssPath} --minify`);
+
+        // Supprimer le fichier temporaire
+        await fs.unlink(tempCssPath);
+    }
+
+    private async transpileJs(jsCode: string, filename: string): Promise<string> {
+        const babel = require('@babel/core');
+        const result = await babel.transformAsync(jsCode, {
+            filename: filename,
+            presets: ['@babel/preset-env', '@babel/preset-react'],
+        });
+        return result.code;
+    }
+
+    private async readFile(filePath: string): Promise<string> {
+        try {
+            return await fs.readFile(filePath, 'utf-8');
+        } catch (error) {
+            logger.error(`Erreur lors de la lecture du fichier ${filePath}:`, error);
+            throw new Error(`Impossible de lire le fichier ${filePath}`);
+        }
+    }
+
+    private async writeFile(filePath: string, content: string): Promise<void> {
+        try {
+            await fs.writeFile(filePath, content);
+        } catch (error) {
+            logger.error(`Erreur lors de l'écriture du fichier ${filePath}:`, error);
+            throw new Error(`Impossible d'écrire le fichier ${filePath}`);
+        }
+    }
+
+    private async ensureDirectoryExists(dirPath: string): Promise<void> {
+        try {
+            await fs.mkdir(dirPath, { recursive: true });
+        } catch (error) {
+            logger.error(`Erreur lors de la création du répertoire ${dirPath}:`, error);
+            throw new Error(`Impossible de créer le répertoire ${dirPath}`);
+        }
+    }
+
+    private replaceHtmlPlaceholders(template: string, config: ChatbotConfig, companyInfo: CompanyInfo, uniqueId: string): string {
+        const configScript = `<script>
+            window.CHATBOT_CONFIG = ${JSON.stringify(config)};
+            window.COMPANY_INFO = ${JSON.stringify(companyInfo)};
+        </script>`;
+
+        const placeholders: { [key: string]: string } = {
+            '{{CHATBOT_TITLE}}': sanitizeHtml(config.headerTitle || 'Assistant Virtuel'),
+            '{{PRIMARY_COLOR}}': sanitizeHtml(config.primaryColor || '#0000FF'),
+            '{{TEXT_COLOR}}': sanitizeHtml(config.textColor || '#FFFFFF'),
+            '{{FONT_FAMILY}}': sanitizeHtml(config.fontFamily || 'Arial, sans-serif'),
+            '{{FONT_SIZE}}': sanitizeHtml(config.fontSize || '14px'),
+            '{{UNIQUE_ID}}': sanitizeHtml(uniqueId),
+            '{{COMPANY_NAME}}': sanitizeHtml(companyInfo.name),
+            '{{CONFIG_SCRIPT}}': configScript,
+        };
+
+        return Object.entries(placeholders).reduce((acc, [key, value]) =>
+            acc.replace(new RegExp(key, 'g'), value), template);
+    }
+
+    private replaceJsPlaceholders(template: string, uniqueId: string): string {
+        // Nous n'avons plus besoin de remplacer CHATBOT_CONFIG et COMPANY_INFO ici
+        // car ils sont maintenant injectés dans le HTML
+        return template.replace(/\{\{UNIQUE_ID\}\}/g, sanitizeJs(uniqueId));
+    }
+
+    private replaceCssPlaceholders(template: string, config: ChatbotConfig): string {
+        const placeholders: { [key: string]: string } = {
+            '{{PRIMARY_COLOR}}': sanitizeCss(config.primaryColor || '#0000FF'),
+            '{{TEXT_COLOR}}': sanitizeCss(config.textColor || '#FFFFFF'),
+            '{{FONT_FAMILY}}': sanitizeCss(config.fontFamily || 'Arial, sans-serif'),
+            '{{FONT_SIZE}}': sanitizeCss(config.fontSize || '14px'),
+            '{{USER_MESSAGE_BACKGROUND_COLOR}}': sanitizeCss(config.userMessageBackgroundColor || '#E1E1E1'),
+            '{{USER_MESSAGE_TEXT_COLOR}}': sanitizeCss(config.userMessageTextColor || '#000000'),
+            '{{BOT_MESSAGE_BACKGROUND_COLOR}}': sanitizeCss(config.botMessageBackgroundColor || '#F1F1F1'),
+            '{{BOT_MESSAGE_TEXT_COLOR}}': sanitizeCss(config.botMessageTextColor || '#000000'),
+        };
+
+        return Object.entries(placeholders).reduce((acc, [key, value]) =>
+            acc.replace(new RegExp(key, 'g'), value), template);
     }
 }
 

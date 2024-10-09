@@ -7,6 +7,7 @@ import { AppError } from '../utils/AppError';
 import logger from '../utils/logger';
 import { CompanyInfo } from '../interfaces/CompanyInfo';
 import OpenAI from 'openai';
+import orderService from '../services/orderService';
 
 export class ChatbotController {
     // Gestion des requêtes HEAD
@@ -110,6 +111,31 @@ export class ChatbotController {
                 res.status(error.statusCode).json({ error: error.message });
             } else {
                 res.status(500).json({ error: 'An error occurred while processing your request' });
+            }
+        }
+    }
+
+    static async renderChatbot(req: Request, res: Response): Promise<void> {
+        const orderId = req.params.orderId;
+        logger.info(`Attempting to render chatbot for orderId: ${orderId}`);
+        try {
+            const order = await orderService.getOrderById(orderId);
+            logger.info(`Order retrieved: ${!!order}`);
+            if (!order) {
+                logger.warn(`Chatbot not found for orderId: ${orderId}`);
+                throw new AppError('Chatbot not found', 404);
+            }
+            logger.info('Rendering chatbot view');
+            res.render('chatbot', {
+                chatbotConfig: order.chatbotConfig,
+                companyInfo: order.companyInfo
+            });
+        } catch (error) {
+            logger.error('Error rendering chatbot:', error);
+            if (error instanceof AppError) {
+                res.status(error.statusCode).render('error', { message: error.message });
+            } else {
+                res.status(500).render('error', { message: 'An error occurred while rendering the chatbot' });
             }
         }
     }

@@ -11,6 +11,11 @@
         "experimentalDecorators": true,
         "sourceMap": true,
         "baseUrl": "./",
+        "types": [
+            "node",
+            "dompurify",
+            "jsdom"
+        ]
     },
     "include": [
         "src/**/*"

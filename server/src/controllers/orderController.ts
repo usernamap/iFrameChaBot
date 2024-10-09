@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import orderService from '../services/orderService';
 import emailService from '../services/emailService';
-import iframeGeneratorService from '../services/iframeGeneratorService';
 import { AppError } from '../utils/AppError';
+import logger from '../utils/logger';
 
 class OrderController {
     public async createOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -28,8 +28,13 @@ class OrderController {
             // Envoyer un e-mail de notification
             await emailService.sendOrderNotification(newOrder);
 
-            // Générer l'iframe
-            const iframeUrl = await iframeGeneratorService.generateIframe(newOrder);
+            // Générer l'URL de l'iframe
+            const iframeUrl = `/api/chatbot/${newOrder._id}`;
+
+            // Afficher l'URL complète dans la console du serveur
+            const fullUrl = `${req.protocol}://${req.get('host')}${iframeUrl}`;
+            logger.info(`Chatbot URL: ${fullUrl}`);
+            console.log(`Chatbot URL: ${fullUrl}`); // Pour une visibilité immédiate dans la console
 
             res.status(201).json({
                 message: 'Commande créée avec succès',

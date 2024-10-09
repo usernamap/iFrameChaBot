@@ -15,6 +15,9 @@ dotenv.config();
 
 const app = express();
 
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 // Connexion à la base de données
 connectDB();
 
@@ -31,7 +34,8 @@ app.use(helmet({
             scriptSrc: ["'self'", "'unsafe-inline'",
                 "https://cdn.tailwindcss.com",
                 "https://unpkg.com",
-                "https://cdnjs.cloudflare.com"
+                "https://cdnjs.cloudflare.com",
+                "https://cdn.jsdelivr.net"
             ],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
@@ -43,6 +47,13 @@ app.use(helmet({
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.use((req, res, next) => {
+    if (req.url.endsWith('.js')) {
+        res.type('application/javascript');
+    }
+    next();
+});
 
 // Servir les fichiers statiques du dossier public
 app.use(express.static(path.join(__dirname, 'public')));
