@@ -186,7 +186,7 @@ export default function Payment() {
                     <p className="text-lg mb-4">Vous avez des questions ? Nous sommes là pour vous aider !</p>
                     <motion.button
                         id="contact-us"
-                        className="bg-secondary text-black px-6 py-2 rounded-full hover:bg-secondary-dark transition-colors flex items-center mx-auto"
+                        className="bg-secondary text-black px-6 py-2 rounded-full hover:bg-secondary-dark transition-colors flex items-center mx-auto  pulse-animation"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setShowContactModal(true)}

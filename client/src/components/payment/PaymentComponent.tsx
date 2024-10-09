@@ -53,7 +53,7 @@ const PaymentComponent: React.FC<PaymentComponentProps> = ({ chatbotConfig, comp
                     </div>
                 </div>
                 <motion.button
-                    className={`w-full bg-primary text-white font-bold py-3 px-4 rounded ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-dark'}`}
+                    className={`w-full bg-primary text-white font-bold py-3 px-4 rounded ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-dark '}`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handlePayment}

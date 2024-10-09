@@ -17,7 +17,8 @@ interface PromoCode {
 
 const availablePromoCodes: PromoCode[] = [
     { code: 'PROMO10', discount: 0.1, freeMonths: 0 },
-    { code: 'beta1', discount: 0, freeMonths: 1 },
+    { code: 'FREE', discount: 0, freeMonths: 1 },
+    { code: 'free', discount: 0, freeMonths: 1 },
     { code: 'SUMMER50', discount: 0.5, freeMonths: 0 },
     { code: 'FREEWEEK', discount: 0, freeMonths: 0.25 },
 ];
@@ -154,6 +155,7 @@ const PaymentSummaryComponent: React.FC<PaymentSummaryComponentProps> = ({
         }
     };
 
+
     if (!selectedSubscription) {
         return (
             <motion.div
@@ -195,7 +197,7 @@ const PaymentSummaryComponent: React.FC<PaymentSummaryComponentProps> = ({
                             <span>
                                 Réduction ({appliedPromo.code})
                                 {isFreeperiod && (
-                                    <span className="block text-sm">
+                                    <span className="block text-sm pulsetext-animation">
                                         Gratuit jusqu'au {getFreePeriodEndDate(appliedPromo.freeMonths)}
                                     </span>
                                 )}
@@ -276,7 +278,7 @@ const PaymentSummaryComponent: React.FC<PaymentSummaryComponentProps> = ({
             <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="w-full bg-primary text-white py-4 rounded-lg font-bold text-lg shadow-lg hover:bg-primary-dark transition duration-300 flex items-center justify-center"
+                className="w-full bg-primary text-white py-4 rounded-lg font-bold text-lg shadow-lg hover:bg-primary-dark transition duration-300 flex items-center justify-center pulse-animation "
                 onClick={handlePayment}
                 disabled={isProcessing}
             >

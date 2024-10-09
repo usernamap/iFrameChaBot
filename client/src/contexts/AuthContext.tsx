@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { auth, emailProvider, googleProvider, facebookProvider, githubProvider, twitterProvider, microsoftProvider } from '../config/firebase';
+import { auth, googleProvider, facebookProvider, githubProvider, twitterProvider, microsoftProvider } from '../config/firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, User, AuthError, signInWithEmailAndPassword } from 'firebase/auth';
 
 interface AuthContextType {
@@ -122,7 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
     }, []);
 
-    const value = {
+    const value = React.useMemo(() => ({
         user,
         loading,
         error,
@@ -133,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loginWithTwitter,
         loginWithMicrosoft,
         logout
-    };
+    }), [user, loading, error]);
 
     return (
         <AuthContext.Provider value={value}>

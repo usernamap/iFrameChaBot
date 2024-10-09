@@ -51,7 +51,7 @@ const Hero: React.FC = () => {
                             Créez votre assistant IA personnalisé en quelques clics et transformez l'expérience de vos clients.
                         </p>
                         <div>
-                            <Link href="/customize" className="inline-flex items-center bg-white text-primary font-bold py-3 px-6 rounded-full text-lg shadow-lg hover:bg-gray-100 transition duration-300">
+                            <Link href="/customize" className="inline-flex items-center bg-white text-primary font-bold py-3 px-6 rounded-full text-lg shadow-lg hover:bg-gray-100 transition duration-300 pulse-animation">
                                 Commencer maintenant
                                 <ArrowRight className="ml-2" size={20} />
                             </Link>

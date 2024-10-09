@@ -9,6 +9,11 @@ export const AppConfig = {
     DATABASE: {
         URI: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/chatbot',
     },
+    EMAIL: {
+        ZOHO_EMAIL: process.env.ZOHO_EMAIL,
+        ZOHO_PASSWORD: process.env.ZOHO_PASSWORD,
+        ADMIN_EMAIL: process.env.ADMIN_EMAIL
+    },
     JWT: {
         SECRET: process.env.JWT_SECRET || 'your_jwt_secret',
         EXPIRATION: '1h',

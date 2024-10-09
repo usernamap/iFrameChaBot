@@ -195,7 +195,7 @@ const CompanyInfoForm: React.FC<CompanyInfoFormProps> = ({ onNextStep, hasVisite
                     {activeTab !== tabOrder[tabOrder.length - 1] ? (
                         <motion.button
                             onClick={handleNextStep}
-                            className="bg-primary text-white px-6 py-2 rounded-full hover:bg-primary-dark transition-colors flex items-center"
+                            className="bg-primary text-white px-6 py-2 rounded-full hover:bg-primary-dark transition-colors flex items-center pulse-animation"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                         >
@@ -206,7 +206,7 @@ const CompanyInfoForm: React.FC<CompanyInfoFormProps> = ({ onNextStep, hasVisite
                         hasVisitedRecap && (
                             <Link href="/recap-and-test" passHref>
                                 <motion.button
-                                    className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition-colors flex items-center"
+                                    className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition-colors flex items-center pulse-animation"
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                 >

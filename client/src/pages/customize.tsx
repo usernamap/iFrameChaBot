@@ -256,7 +256,7 @@ export default function CustomizeChatbot() {
                                     <div className="mt-4 flex justify-center">
                                         <Link href="/recap-and-test" passHref>
                                             <motion.button
-                                                className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition-colors flex items-center text-center"
+                                                className="bg-green-500 text-white px-6 py-2 rounded-full hover:bg-green-600 transition-colors flex items-center text-center pulse-animation"
                                                 whileHover={{ scale: 1.05 }}
                                                 whileTap={{ scale: 0.95 }}
                                             >
@@ -269,7 +269,7 @@ export default function CustomizeChatbot() {
                                 <div className="flex justify-center mt-4">
                                     <motion.button
                                         onClick={handleNextStep}
-                                        className="bg-primary text-white px-6 py-2 rounded-full hover:bg-primary-dark flex items-center justify-center"
+                                        className="bg-primary text-white px-6 py-2 rounded-full hover:bg-primary-dark flex items-center justify-center pulse-animation"
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                     >
