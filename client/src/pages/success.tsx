@@ -55,11 +55,24 @@ const InvoicePDF = ({ orderNumber, companyInfo, selectedSubscription, appliedPro
     const tvaAmount = totalHT * 0.2;
     const totalTTC = totalHT + tvaAmount;
 
+    interface DisplayFreePeriodProps {
+        freeMonths: number;
+    }
+
+    const displayFreePeriod = ({ freeMonths }: DisplayFreePeriodProps): string => {
+        if (freeMonths >= 1) {
+            return `${freeMonths} mois`;
+        } else {
+            const weeks = Math.round(freeMonths * 4); // Conversion en semaines
+            return `${weeks} ${weeks > 1 ? 'semaines' : 'semaine'}`;
+        }
+    };
+
     return (
         <Document>
             <Page size="A4" style={styles.page}>
                 {/* Logo de l'entreprise */}
-                <Image style={styles.logo} src="/path/to/alitech-logo.png" />
+                <Image style={styles.logo} src="https://aliatech.fr/logo.svg" />
 
                 {/* Titre */}
                 <Text style={styles.title}>Facture</Text>
@@ -103,7 +116,7 @@ const InvoicePDF = ({ orderNumber, companyInfo, selectedSubscription, appliedPro
                     {isFreeTrial ? (
                         <View style={styles.section}>
                             <Text style={styles.text}>
-                                Vous bénéficiez actuellement d'une période d'essai gratuite. Aucun montant n'est dû pour cette période.
+                                Vous bénéficiez actuellement d'une période d'essai gratuite de {displayFreePeriod(appliedPromo.freeMonths)}. Aucun montant n'est dû pour cette période.
                             </Text>
                         </View>
                     ) : (
@@ -186,6 +199,19 @@ const SuccessPage: React.FC = () => {
     const formatFileName = () => {
         const formattedDate = format(new Date(), 'dd-MM-yyyy', { locale: fr });
         return `Facture_${companyInfo?.name.replace(/\s+/g, '_')}_${orderNumber}_${formattedDate}_assisant-aliatech.pdf`;
+    };
+
+    interface DisplayFreePeriodProps {
+        freeMonths: number;
+    }
+
+    const displayFreePeriod = ({ freeMonths }: DisplayFreePeriodProps): string => {
+        if (freeMonths >= 1) {
+            return `${freeMonths} mois`;
+        } else {
+            const weeks = Math.round(freeMonths * 4); // Conversion en semaines
+            return `${weeks} ${weeks > 1 ? 'semaines' : 'semaine'}`;
+        }
     };
 
     // Récupérer le décompte depuis le serveur
@@ -453,6 +479,12 @@ const SuccessPage: React.FC = () => {
                             <p><strong>Numéro de commande :</strong> {orderNumber}</p>
                             <p><strong>Formule :</strong> {selectedSubscription.name}</p>
                             <p><strong>Prix mensuel :</strong> {selectedSubscription.price.toFixed(2)} €</p>
+                            {appliedPromo && appliedPromo.discount > 0 && (
+                                <p><strong>Promotion :</strong> {appliedPromo.discount * 100}%</p>
+                            )}
+                            {appliedPromo && appliedPromo.freeMonths > 0 && (
+                                <p><strong>Période d'essai gratuite :</strong> {displayFreePeriod(appliedPromo)}</p>
+                            )}
                         </div>
                     </div>
                     <div className="mt-8">
@@ -464,7 +496,15 @@ const SuccessPage: React.FC = () => {
                         </ul>
                     </div>
                     <div className="mt-8 text-right">
-                        <p className="text-3xl font-bold text-primary">Total : {selectedSubscription.price.toFixed(2)} € / mois</p>
+                        {/* si période gratuite */}
+                        {appliedPromo && appliedPromo.freeMonths > 0 && (
+                            <p className="text-green-600 font-semibold">Période d'essai gratuite de {displayFreePeriod(appliedPromo)} offerte</p>
+                        )}
+                        {/* si promotion */}
+                        {appliedPromo && appliedPromo.discount > 0 && (
+                            <p className="text-green-600 font-semibold">Promotion de {appliedPromo.discount * 100}% appliquée</p>
+                        )}
+                        <p className="text-xl font-semibold mt-4">Total TTC : {selectedSubscription.price.toFixed(2)} €</p>
                     </div>
                 </motion.div>
 
