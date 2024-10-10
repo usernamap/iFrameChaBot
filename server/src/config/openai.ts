@@ -4,7 +4,7 @@ import { SpeechCreateParams } from 'openai/resources/audio';
 import { CompanyInfo } from '../interfaces/CompanyInfo';
 
 export const OpenAIConfig: OpenAIConfig = {
-  API_KEY: process.env.OPENAI_API_KEY || 'votre_clé_api_par_défaut',
+  API_KEY: process.env.OPENAI_API_KEY || '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',
   CHAT: {
     MODEL: 'gpt-4',
     MAX_TOKENS: 150,
