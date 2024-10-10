@@ -3,7 +3,7 @@ import { OpenAIConfig } from './openai';
 
 export const AppConfig = {
     SERVER: {
-        PORT: process.env.PORT || 3002,
+        PORT: process.env.PORT || 4004,
         ENV: process.env.NODE_ENV || 'development',
     },
     DATABASE: {
